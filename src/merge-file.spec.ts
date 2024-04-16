@@ -250,13 +250,13 @@ describe("mergeFile", () => {
 					added: undefined,
 					count: 1,
 					removed: true,
-					value: '	"huh": "~1.0.0"\n',
+					value: '		"huh": "~1.0.0"\n',
 				},
 				{
 					added: true,
 					count: 1,
 					removed: undefined,
-					value: '	"huh": "^2.30.0"\n',
+					value: '		"huh": "^2.30.0"\n',
 				},
 			]),
 		});
@@ -350,29 +350,29 @@ describe("mergeFile", () => {
 					added: undefined,
 					count: 17,
 					removed: true,
-					value: `  "name": "mypkg",
-  "description": "my description",
-  "dependencies": {
-	"mypackage": "^1.2.0",
-	"newpacakge": "^22.2.2",
-	"package2": "3.22.1",
-	"huh": "~1.0.0"
-  },
-  "engines": {
-	"node": ">=20"
-  },
-  "scripts": {
-	"build": "build",
-	"test": "jest",
-	"myscript": "somescript"
-  },
-  "version": "new-version"\n`,
+					value: `	"name": "mypkg",
+	"description": "my description",
+	"dependencies": {
+		"mypackage": "^1.2.0",
+		"newpacakge": "^22.2.2",
+		"package2": "3.22.1",
+		"huh": "~1.0.0"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"build": "build",
+		"test": "jest",
+		"myscript": "somescript"
+	},
+	"version": "new-version"\n`,
 				},
 				{
 					added: true,
 					count: 1,
 					removed: undefined,
-					value: `	"tested": true\n`,
+					value: `    "tested": true\n`,
 				},
 			]),
 		});

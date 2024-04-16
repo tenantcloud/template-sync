@@ -1,7 +1,5 @@
 {
-	"ignore": [
-		"custom-bin/**"
-	],
+	"ignore": ["custom-bin/**"],
 	"merge": {
 		".json": {
 			"plugin": "plugins/custom-plugin.js",
