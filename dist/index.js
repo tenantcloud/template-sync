@@ -61296,7 +61296,9 @@ async function syncGithubRepo(options) {
     const octokit = github.getOctokit(options.githubToken);
     const repoRoot = options.repoRoot ?? process.cwd();
     const branchPrefix = options.branchPrefix ?? constants_1.DEFAULT_BRANCH_PREFIX;
-    const commitMsg = options.commitMsg ? options.commitMsg : constants_1.DEFAULT_COMMIT_MSG;
+    const commitMsg = options.commitMsg
+        ? options.commitMsg
+        : constants_1.DEFAULT_COMMIT_MSG;
     // Note, we use git here so that we can change this around for other git providers more easily
     const baseRepoUrl = `github.com/${options.repoPath}.git`;
     const authedRepoUrl = `https://${options.remoteRepoToken ? `github_actions:${options.remoteRepoToken}@` : ""}${baseRepoUrl}`;
@@ -61397,7 +61399,9 @@ async function loadPlugin(mergeConfig, forExt, configDir) {
     if (mergeConfig.plugin) {
         // First check if this is a loal .js file
         const localPath = (0, path_1.resolve)(configDir, mergeConfig.plugin);
-        const importPath = (0, fs_1.existsSync)(localPath) ? localPath : mergeConfig.plugin;
+        const importPath = (0, fs_1.existsSync)(localPath)
+            ? localPath
+            : mergeConfig.plugin;
         try {
             // Sad workaround for testing since dynamic import segfaults
             if (process.env.JEST_WORKER_ID !== undefined) {
@@ -61408,8 +61412,7 @@ async function loadPlugin(mergeConfig, forExt, configDir) {
                 handler = (await __nccwpck_require__(7070)(importPath));
             }
             if (!handler.merge) {
-                handler = handler
-                    .default;
+                handler = handler.default;
             }
         }
         catch (err) {
