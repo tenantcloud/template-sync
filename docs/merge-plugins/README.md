@@ -39,15 +39,9 @@ plugin that is built-in with this library:
 					"glob": "package.json",
 					"options": {
 						"paths": [
-							[
-								"$.scripts.publish",
-								"merge-template"
-							],
+							["$.scripts.publish", "merge-template"],
 							// Any changes to publish are so critical that we want them to sync
-							[
-								"$.devDependencies",
-								"merge-template"
-							]
+							["$.devDependencies", "merge-template"]
 							// Always ensure dev dependency versions for our scripts are updated
 						]
 					}
@@ -77,10 +71,7 @@ config file, they can specify their own merge configuration for the package.json
 					"glob": "package.json",
 					"options": {
 						"paths": [
-							[
-								"$.devDependencies",
-								"merge-template"
-							]
+							["$.devDependencies", "merge-template"]
 							// Always ensure dev dependency versions for our scripts are updated
 						]
 					}

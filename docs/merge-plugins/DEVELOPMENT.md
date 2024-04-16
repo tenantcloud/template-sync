@@ -1,8 +1,8 @@
 # Plugin Development
 
-- [Plugin Development](#plugin-development)
-  - [Example: hello \<world\>](#example-hello-world) - [Example one: local file](#example-one-local-file) - [Example two: npm package](#example-two-npm-package)
-  <!-- Created with Markdown All In One VsCode Extension -->
+-   [Plugin Development](#plugin-development)
+    -   [Example: hello \<world\>](#example-hello-world) - [Example one: local file](#example-one-local-file) - [Example two: npm package](#example-two-npm-package)
+    <!-- Created with Markdown All In One VsCode Extension -->
 
 The templatesync.json and templatesync.local.config files make use of a `"merge"` property where you can
 customize the baseline behavior of ignore or overwrite from template.
@@ -13,28 +13,28 @@ At the core of it, you need to have a file or npm package that exposes the inter
 
 ```typescript
 export interface MergePlugin<PluginOptions> {
-  /**
-   * This method will be called when a file from the template and it's analog in the downstream repo
-   * have some differences.  The plugin must perform the merge and return the appropriate file contents
-   * as a string
-   *
-   * TODO: we may create a V2 plugin that could deal with large files and not pass around strings in memory,
-   * but for now, this is the current implementation
-   *
-   * @param current - The downstream repo's current file contents
-   * @param fromTemplateRepo - the current
-   * @param context - an object defining the context around the file and the specific options
-   */
-  merge(
-    current: string,
-    fromTemplateRepo: string,
-    context: MergeContext<PluginOptions>,
-  ): Promise<string>;
-  /**
-   * Given an options object for the merge, this validates the options object and returns error messages if there is anything wrong.
-   * @param options any json value that the user provided - must be validated against the expected options
-   */
-  validate(options: unknown): string[] | undefined;
+	/**
+	 * This method will be called when a file from the template and it's analog in the downstream repo
+	 * have some differences.  The plugin must perform the merge and return the appropriate file contents
+	 * as a string
+	 *
+	 * TODO: we may create a V2 plugin that could deal with large files and not pass around strings in memory,
+	 * but for now, this is the current implementation
+	 *
+	 * @param current - The downstream repo's current file contents
+	 * @param fromTemplateRepo - the current
+	 * @param context - an object defining the context around the file and the specific options
+	 */
+	merge(
+		current: string,
+		fromTemplateRepo: string,
+		context: MergeContext<PluginOptions>,
+	): Promise<string>;
+	/**
+	 * Given an options object for the merge, this validates the options object and returns error messages if there is anything wrong.
+	 * @param options any json value that the user provided - must be validated against the expected options
+	 */
+	validate(options: unknown): string[] | undefined;
 }
 ```
 
@@ -89,19 +89,19 @@ With all of that set up, as long as we have the package available to the pacakge
 
 ```json
 {
-  "merge": {
-    ".txt": {
-      "plugin": "dist/hello-plugin.js", // Note, we make it point to the compiled .js so you will need to build and commit the file
-      "rules": [
-        {
-          "glob": "**/*",
-          "options": {
-            "world": "chad"
-          }
-        }
-      ]
-    }
-  }
+	"merge": {
+		".txt": {
+			"plugin": "dist/hello-plugin.js", // Note, we make it point to the compiled .js so you will need to build and commit the file
+			"rules": [
+				{
+					"glob": "**/*",
+					"options": {
+						"world": "chad"
+					}
+				}
+			]
+		}
+	}
 }
 ```
 
@@ -112,18 +112,18 @@ simply reference the package (assuming that it exposes the required functions as
 
 ```json
 {
-  "merge": {
-    ".txt": {
-      "plugin": "@myscope/hello-merge",
-      "rules": [
-        {
-          "glob": "**/*",
-          "options": {
-            "world": "chad"
-          }
-        }
-      ]
-    }
-  }
+	"merge": {
+		".txt": {
+			"plugin": "@myscope/hello-merge",
+			"rules": [
+				{
+					"glob": "**/*",
+					"options": {
+						"world": "chad"
+					}
+				}
+			]
+		}
+	}
 }
 ```

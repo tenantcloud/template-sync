@@ -34,16 +34,16 @@ const twoSpaces = `{
 }`;
 
 describe("inferJSONIndent", () => {
-  it("returns spaces when the first indent is spaces with a new line", () => {
-    expect(inferJSONIndent(withNewLine)).toBe("    ");
-  });
-  it("returns spaces when the first indent is spaces", () => {
-    expect(inferJSONIndent(fourSpaces)).toBe("    ");
-  });
-  it("returns spaces when the first indent is spaces", () => {
-    expect(inferJSONIndent(twoSpaces)).toBe("  ");
-  });
-  it("returns tabs when the first indent is a tab", () => {
-    expect(inferJSONIndent(tabSpaces)).toBe("\t");
-  });
+	it("returns spaces when the first indent is spaces with a new line", () => {
+		expect(inferJSONIndent(withNewLine)).toBe("    ");
+	});
+	it("returns spaces when the first indent is spaces", () => {
+		expect(inferJSONIndent(fourSpaces)).toBe("    ");
+	});
+	it("returns spaces when the first indent is spaces", () => {
+		expect(inferJSONIndent(twoSpaces)).toBe("  ");
+	});
+	it("returns tabs when the first indent is a tab", () => {
+		expect(inferJSONIndent(tabSpaces)).toBe("\t");
+	});
 });

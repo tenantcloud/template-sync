@@ -13,15 +13,15 @@ best practice development patterns, then we naturally want to have a way to allo
 changes, while also having control over things that may be specifically changed due to their need to support something beyond the
 orgnaization standard.
 
-- [Template Sync](#template-sync)
-- [How to use this](#how-to-use-this)
-  - [Config file](#config-file)
-    - [File format](#file-format)
-    - [Example 1 - Using a custom plugin](#example-1---using-a-custom-plugin)
-    - [Example 2 - Using a custom plugin for some paths](#example-2---using-a-custom-plugin-for-some-paths)
-  - [From SHA/Tag directive](#from-shatag-directive)
-  - [Programmatic API](#programmatic-api)
-  <!-- Created with Markdown All In One VsCode Entension, rerun to update -->
+-   [Template Sync](#template-sync)
+-   [How to use this](#how-to-use-this)
+    -   [Config file](#config-file)
+        -   [File format](#file-format)
+        -   [Example 1 - Using a custom plugin](#example-1---using-a-custom-plugin)
+        -   [Example 2 - Using a custom plugin for some paths](#example-2---using-a-custom-plugin-for-some-paths)
+    -   [From SHA/Tag directive](#from-shatag-directive)
+    -   [Programmatic API](#programmatic-api)
+    <!-- Created with Markdown All In One VsCode Entension, rerun to update -->
 
 # How to use this
 
@@ -32,11 +32,11 @@ for those who would like to implement the same calls in another CI/CD structure.
 
 There are two types of config files that you can create:
 
-- `templatesync.config` in the template repo (this is for the template maintainer to specify how they would expect a roll out
-  to update and for them to exclude anything that is more of an example than a standard (for instance, a hellow world placeholder))
+-   `templatesync.config` in the template repo (this is for the template maintainer to specify how they would expect a roll out
+    to update and for them to exclude anything that is more of an example than a standard (for instance, a hellow world placeholder))
 
-- `templatesync.local.config` in the repo that cloned the template. This is meant for the repo maintainers to have the ability to avoid
-  or customize updates between the template repo in the event that they have deviated purposefully from it.
+-   `templatesync.local.config` in the repo that cloned the template. This is meant for the repo maintainers to have the ability to avoid
+    or customize updates between the template repo in the event that they have deviated purposefully from it.
 
 This library will always respect the overrides of the local template sync file if it exists but, as a compromise to rapidly developing
 templates and their repos, will also provide a list of all files whose template sync behavior was either ignored or overridden by the local
@@ -50,28 +50,28 @@ Please see the [plugins](./docs/merge-plugins/) documentation for more informati
 
 ```typescript
 export interface Config {
-  /**
-   * A set of micromatch globs that we are supposed to ignore
-   */
-  ignore: string[];
-  /**
-   * If there is no merge config, then we will always just overwrite the file for the diff
-   */
-  merge: {
-    /**
-     * .json file merge overrides.  Keep in mind,
-     */
-    ".json": {
-      // You can add a merge plugin for extensions that we don't natively support
-      mergePlugin: string;
-      /**
-       * A list of file globs for json files that can have custom rules applied
-       *
-       * The first matching glob will be applied so make sure to put your defaults last
-       */
-      [fileGlobs: string]: JsonFileMerge;
-    }[];
-  };
+	/**
+	 * A set of micromatch globs that we are supposed to ignore
+	 */
+	ignore: string[];
+	/**
+	 * If there is no merge config, then we will always just overwrite the file for the diff
+	 */
+	merge: {
+		/**
+		 * .json file merge overrides.  Keep in mind,
+		 */
+		".json": {
+			// You can add a merge plugin for extensions that we don't natively support
+			mergePlugin: string;
+			/**
+			 * A list of file globs for json files that can have custom rules applied
+			 *
+			 * The first matching glob will be applied so make sure to put your defaults last
+			 */
+			[fileGlobs: string]: JsonFileMerge;
+		}[];
+	};
 }
 ```
 

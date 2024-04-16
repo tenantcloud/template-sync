@@ -5,6 +5,6 @@
  * frameworks can provide their own ref
  */
 export type TemplateRefDriverFn = (options: {
-  /** The root dir where we want to get the "current" ref */
-  rootDir: string;
+	/** The root dir where we want to get the "current" ref */
+	rootDir: string;
 }) => Promise<string>;

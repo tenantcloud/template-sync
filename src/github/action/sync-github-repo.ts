@@ -11,8 +11,8 @@ import {
 } from "./constants";
 import { getBranchName } from "./get-branch-name";
 import { writeFileSync } from "fs";
-import {TEMPLATE_SYNC_LOCAL_CONFIG, templateSync} from "../../template-sync";
-import {syncResultsToMd} from "../../formatting";
+import { TEMPLATE_SYNC_LOCAL_CONFIG, templateSync } from "../../template-sync";
+import { syncResultsToMd } from "../../formatting";
 
 export interface GithubOptions {
 	/**
@@ -77,7 +77,9 @@ export async function syncGithubRepo(options: GithubOptions) {
 
 	const repoRoot = options.repoRoot ?? process.cwd();
 	const branchPrefix = options.branchPrefix ?? DEFAULT_BRANCH_PREFIX;
-	const commitMsg = options.commitMsg ? options.commitMsg : DEFAULT_COMMIT_MSG;
+	const commitMsg = options.commitMsg
+		? options.commitMsg
+		: DEFAULT_COMMIT_MSG;
 
 	// Note, we use git here so that we can change this around for other git providers more easily
 	const baseRepoUrl = `github.com/${options.repoPath}.git`;

@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 import { createHash } from "crypto";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
-import {TEMPLATE_SYNC_LOCAL_CONFIG} from "../../template-sync";
+import { TEMPLATE_SYNC_LOCAL_CONFIG } from "../../template-sync";
 
 interface GetBranchNameOptions {
 	templateBranch: string;

@@ -3,13 +3,13 @@
 This document lists all merge plugins that are provided provided as defaults for certain file extensions.
 These should be found in the [plugins folder](src/plugins)
 
-- [Current Merge Plugins](#current-merge-plugins)
-  - [Json Merge Plugin](#json-merge-plugin)
-  - [Configuration Options:](#configuration-options)
-    - [Simple merge spec](#simple-merge-spec)
-    - [JsonPath config](#jsonpath-config)
-      - [Example](#example)
-    - [About Comments](#about-comments)
+-   [Current Merge Plugins](#current-merge-plugins)
+    -   [Json Merge Plugin](#json-merge-plugin)
+    -   [Configuration Options:](#configuration-options)
+        -   [Simple merge spec](#simple-merge-spec)
+        -   [JsonPath config](#jsonpath-config)
+            -   [Example](#example)
+        -   [About Comments](#about-comments)
 
 <!-- Created with Markdown All In One VsCode Extension -->
 
@@ -23,32 +23,32 @@ The json merge plugin allows you to configure jsonpath based merges on any .json
 
 At it's simplest, you can take advantage of lodash merge behavior by just specifying one of:
 
-- overwrite - the template completely overwrites the file
-- merge-template - keys are merged together with the template overwriting any matching keys on local file
-- merge-current - keys are merged together with the local file keeping any keys that match in the template
+-   overwrite - the template completely overwrites the file
+-   merge-template - keys are merged together with the template overwriting any matching keys on local file
+-   merge-current - keys are merged together with the local file keeping any keys that match in the template
 
 Example config:
 
 ```json
 {
-  "merge": {
-    ".json": {
-      "rules": [
-        {
-          "glob": "metadata.json",
-          "options": "merge-template"
-        },
-        {
-          "glob": "template-lock.json",
-          "options": "overwrite"
-        },
-        {
-          "glob": "package.json",
-          "options": "merge-current"
-        }
-      ]
-    }
-  }
+	"merge": {
+		".json": {
+			"rules": [
+				{
+					"glob": "metadata.json",
+					"options": "merge-template"
+				},
+				{
+					"glob": "template-lock.json",
+					"options": "overwrite"
+				},
+				{
+					"glob": "package.json",
+					"options": "merge-current"
+				}
+			]
+		}
+	}
 }
 ```
 
@@ -59,27 +59,27 @@ the level of merge per field.
 
 A few rules:
 
-- Once you have provided jsonpath options, only the json path options (or new fields if the option is enabled) will be merged
-- jsonpaths are run from first to last. This means you can layer merges.
+-   Once you have provided jsonpath options, only the json path options (or new fields if the option is enabled) will be merged
+-   jsonpaths are run from first to last. This means you can layer merges.
 
 ```typescript
 interface Options {
-  /**
-   * If set to true, this means we won't add new properties from the template
-   */
-  ignoreNewProperties?: boolean;
-  /**
-   * If set to true, overwrite will apply undefined values as deleted for the jsonpaths
-   * or for values that are supposed to be merged on top of other values
-   */
-  missingIsDelete?: boolean;
-  /**
-   * Note, if multiple json paths match a rule, we pick the first one in the list that matches
-   */
-  paths: /**
-   * We only override jsonpaths.  Anything not specified is kept the same.
-   */
-  [jsonPath: `$.${string}`, options: BaseJsonMergeOptions][];
+	/**
+	 * If set to true, this means we won't add new properties from the template
+	 */
+	ignoreNewProperties?: boolean;
+	/**
+	 * If set to true, overwrite will apply undefined values as deleted for the jsonpaths
+	 * or for values that are supposed to be merged on top of other values
+	 */
+	missingIsDelete?: boolean;
+	/**
+	 * Note, if multiple json paths match a rule, we pick the first one in the list that matches
+	 */
+	paths: /**
+	 * We only override jsonpaths.  Anything not specified is kept the same.
+	 */
+	[jsonPath: `$.${string}`, options: BaseJsonMergeOptions][];
 }
 ```
 
@@ -89,36 +89,36 @@ This
 
 ```json
 {
-  "merge": {
-    ".json": {
-      "rules": [
-        {
-          "glob": "metadata.json",
-          "options": {
-            "ignoreNewProperties": false,
-            "missingIsDelete:": true,
-            "paths": [
-              ["$.path", "template-merge"] // if we delete path in the template, it will delete the path
-            ]
-          }
-        },
-        {
-          "glob": "template-lock.json",
-          "options": "overwrite"
-        },
-        {
-          "glob": "package.json",
-          "options": {
-            "ignoreNewProperties": false,
-            "paths": [
-              ["$.scripts.*", "template-merge"],
-              ["$.scripts.specific-script", "template-currrent"] // We end up keeping the current template
-            ]
-          }
-        }
-      ]
-    }
-  }
+	"merge": {
+		".json": {
+			"rules": [
+				{
+					"glob": "metadata.json",
+					"options": {
+						"ignoreNewProperties": false,
+						"missingIsDelete:": true,
+						"paths": [
+							["$.path", "template-merge"] // if we delete path in the template, it will delete the path
+						]
+					}
+				},
+				{
+					"glob": "template-lock.json",
+					"options": "overwrite"
+				},
+				{
+					"glob": "package.json",
+					"options": {
+						"ignoreNewProperties": false,
+						"paths": [
+							["$.scripts.*", "template-merge"],
+							["$.scripts.specific-script", "template-currrent"] // We end up keeping the current template
+						]
+					}
+				}
+			]
+		}
+	}
 }
 ```
 

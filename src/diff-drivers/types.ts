@@ -3,6 +3,6 @@
  * since the last sha
  */
 export type TemplateDiffDriverFn = (
-  gitDir: string,
-  afterRef: string,
+	gitDir: string,
+	afterRef: string,
 ) => Promise<string[]>;
