@@ -84,8 +84,8 @@ jobs:
             - name: Build
               run: npm run build
 
-            - name: sync-private-repo
-              id: test_run
+            - name: Sync
+              id: sync
               uses: ./
               with:
                   repoPath: HanseltimeIndustries/test-private-template
@@ -96,10 +96,10 @@ jobs:
                   branchPrefix: ${{ env.BRANCH_NAME }}
                   mockLocalConfig: "{}"
 
-            - name: assert
+            - name: Assert changes
               run: |
-                  npx ts-node src/test-utils/confirm-repo-template.ts \
-                    --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
+                  npx ts-node tests/integration/utils/assert.ts \
+                    --expectedPullNumber "${{ steps.sync.outputs.prNumber }}" \
                     --expectedToBranch "main" \
                     --expectedFromBranch "main" \
                     --expectedFilesChanged "new_file.md" "package.json" "templatesync.json" "templatesync.local.json" \
@@ -108,11 +108,11 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: clean
+            - name: Cleanup
               if: always()
               run: |
-                  npx ts-node src/test-utils/clear-int-test-resources.ts \
-                    --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
+                  npx ts-node tests/integration/utils/cleanup.ts \
+                    --expectedPullNumber "${{ steps.sync.outputs.prNumber }}" \
                     --expectedFromBranch "main" \
                     --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
                     --expectedBranchPrefix "${{ env.BRANCH_NAME }}"
@@ -141,8 +141,8 @@ jobs:
             - name: Build
               run: npm run build
 
-            - name: sync-private-repo
-              id: test_run
+            - name: Sync
+              id: sync
               uses: ./
               with:
                   repoPath: HanseltimeIndustries/test-public-template
@@ -153,10 +153,10 @@ jobs:
                   updateAfterRef: false
                   mockLocalConfig: "{}"
 
-            - name: assert
+            - name: Assert changes
               run: |
-                  npx ts-node src/test-utils/confirm-repo-template.ts \
-                    --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
+                  npx ts-node tests/integration/utils/assert.ts \
+                    --expectedPullNumber "${{ steps.sync.outputs.prNumber }}" \
                     --expectedToBranch "main" \
                     --expectedFromBranch "main" \
                     --expectedFilesChanged "new_file.md" "package.json" "templatesync.json" "templatesync.local.json" \
@@ -165,11 +165,11 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: clean
+            - name: Cleanup
               if: always()
               run: |
-                  npx ts-node src/test-utils/clear-int-test-resources.ts \
-                    --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
+                  npx ts-node tests/integration/utils/cleanup.ts \
+                    --expectedPullNumber "${{ steps.sync.outputs.prNumber }}" \
                     --expectedFromBranch "main" \
                     --expectedFromRepoPath "HanseltimeIndustries/test-public-template" \
                     --expectedBranchPrefix "${{ env.BRANCH_NAME }}-public-update-ref"
