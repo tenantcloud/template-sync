@@ -4,7 +4,7 @@
 	"scripts": {
 		"format": "prettier . --write",
 		"lint": "eslint .",
-		"test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "ncc build src/github/action/main.ts -o dist"
 	},
 	"license": "MIT",
@@ -44,5 +44,16 @@
 	},
 	"engines": {
 		"node": ">=20"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/HanseltimeIndustries/test-private-template.git"
+	},
+	"version": "1.0.0",
+	"main": "index.js",
+	"author": "",
+	"bugs": {
+		"url": "https://github.com/HanseltimeIndustries/test-private-template/issues"
+	},
+	"homepage": "https://github.com/HanseltimeIndustries/test-private-template#readme"
 }
