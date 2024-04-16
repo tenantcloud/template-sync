@@ -55,141 +55,44 @@ jobs:
                 run: |
                     npm run lint
                     npx prettier . --check
-#
-#    private-int-test:
-#        runs-on: ubuntu-latest
-#        permissions:
-#            contents: write
-#            pull-requests: write
-#        steps:
-#            # Create git client with PAT that has access to the private template
-#            -   uses: actions/checkout@v4
-#                with:
-#                    token: ${{ secrets.PRIVATE_TEMPLATE_TEST_PAT }}
-#            -   name: setup git
-#                run: |
-#                    git config user.name github-int-test
-#                    git config user.email github-int-test@github.com
-#            -   name: install
-#                run: |
-#                    npm ci
-#            -   name: bundle
-#                run: |
-#                    npm run bundle
-#            -   name: sync-private-repo
-#                id: test_run
-#                uses: ./
-#                with:
-#                    repoPath: HanseltimeIndustries/test-private-template
-#                    githubToken: ${{ secrets.GITHUB_TOKEN }}
-#                    remoteRepoToken: ${{ secrets.PRIVATE_TEMPLATE_TEST_PAT }}
-#                    templateBranch: main
-#                    commitMsg: "build(boilerplate-int-test): synchronize template repo"
-#                    branchPrefix: ${{ inputs.templatePrefix }}
-#                    mockLocalConfig: "{}"
-#            -   name: assert
-#                run: |
-#                    npx ts-node src/test-utils/confirm-repo-template.ts \
-#                      --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
-#                      --expectedToBranch "main" \
-#                      --expectedFromBranch "main" \
-#                      --expectedFilesChanged "new_file.md" "package.json" "templatesync.json" "templatesync.local.json" \
-#                      --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
-#                      --expectedBranchPrefix "${{ inputs.templatePrefix }}"
-#                env:
-#                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#            -   name: clean
-#                if: always()
-#                run: |
-#                    npx ts-node src/test-utils/clear-int-test-resources.ts \
-#                      --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
-#                      --expectedFromBranch "main" \
-#                      --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
-#                      --expectedBranchPrefix "${{ inputs.templatePrefix }}"
-#                env:
-#                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#    private-int-test-after-ref:
-#        runs-on: ubuntu-latest
-#        permissions:
-#            contents: write
-#            pull-requests: write
-#        steps:
-#            # Create git client with PAT that has access to the private template
-#            -   uses: actions/checkout@v4
-#                with:
-#                    token: ${{ secrets.PRIVATE_TEMPLATE_TEST_PAT }}
-#            -   name: setup git
-#                run: |
-#                    git config user.name github-int-test
-#                    git config user.email github-int-test@github.com
-#            -   name: install
-#                run: |
-#                    npm ci
-#            -   name: bundle
-#                run: |
-#                    npm run bundle
-#            -   name: sync-private-repo
-#                id: test_run
-#                uses: ./
-#                with:
-#                    repoPath: HanseltimeIndustries/test-private-template
-#                    githubToken: ${{ secrets.GITHUB_TOKEN }}
-#                    remoteRepoToken: ${{ secrets.PRIVATE_TEMPLATE_TEST_PAT }}
-#                    templateBranch: main
-#                    commitMsg: "build(boilerplate-int-test): synchronize template repo"
-#                    branchPrefix: ${{ inputs.templatePrefix }}-after-ref
-#                    mockLocalConfig: '{ "afterRef": "85499cc1e4814cf7d8cd90e6eeb0a7e2e243a017" }'
-#            -   name: assert
-#                run: |
-#                    npx ts-node src/test-utils/confirm-repo-template.ts \
-#                      --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
-#                      --expectedToBranch "main" \
-#                      --expectedFromBranch "main" \
-#                      --expectedFilesChanged "new_file.md" "templatesync.local.json" \
-#                      --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
-#                      --expectedBranchPrefix "${{ inputs.templatePrefix }}-after-ref"
-#                env:
-#                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#            -   name: clean
-#                if: always()
-#                run: |
-#                    npx ts-node src/test-utils/clear-int-test-resources.ts \
-#                      --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
-#                      --expectedFromBranch "main" \
-#                      --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
-#                      --expectedBranchPrefix "${{ inputs.templatePrefix }}-after-ref"
-#                env:
-#                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    public-int-test:
+    integration-private:
+        name: Integration test with private template
         runs-on: ubuntu-latest
         permissions:
             contents: write
             pull-requests: write
+
         steps:
             # Create git client with PAT that has access to the private template
-            -   uses: actions/checkout@v4
-            -   name: setup git
+            -   name: Checkout code
+                uses: actions/checkout@v3
+                with:
+                    token: ${{ secrets.PRIVATE_TEMPLATE_TEST_PAT }}
+
+            -   name: Setup git
                 run: |
                     git config user.name github-int-test
                     git config user.email github-int-test@github.com
-            -   name: install
-                run: |
-                    npm ci
-            -   name: bundle
-                run: |
-                    npm run bundle
+
+            -   name: Install dependencies
+                run: npm ci
+
+            -   name: Build
+                run: npm run build
+
             -   name: sync-private-repo
                 id: test_run
                 uses: ./
                 with:
-                    repoPath: HanseltimeIndustries/test-public-template
+                    repoPath: HanseltimeIndustries/test-private-template
                     githubToken: ${{ secrets.GITHUB_TOKEN }}
+                    remoteRepoToken: ${{ secrets.PRIVATE_TEMPLATE_TEST_PAT }}
                     templateBranch: main
                     commitMsg: "build(boilerplate-int-test): synchronize template repo"
-                    branchPrefix: ${{ inputs.templatePrefix }}-public
+                    branchPrefix: ${{ inputs.templatePrefix }}
                     mockLocalConfig: "{}"
+
             -   name: assert
                 run: |
                     npx ts-node src/test-utils/confirm-repo-template.ts \
@@ -197,39 +100,44 @@ jobs:
                       --expectedToBranch "main" \
                       --expectedFromBranch "main" \
                       --expectedFilesChanged "new_file.md" "package.json" "templatesync.json" "templatesync.local.json" \
-                      --expectedFromRepoPath "HanseltimeIndustries/test-public-template" \
-                      --expectedBranchPrefix "${{ inputs.templatePrefix }}-public"
+                      --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
+                      --expectedBranchPrefix "${{ inputs.templatePrefix }}"
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             -   name: clean
                 if: always()
                 run: |
                     npx ts-node src/test-utils/clear-int-test-resources.ts \
                       --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
                       --expectedFromBranch "main" \
-                      --expectedFromRepoPath "HanseltimeIndustries/test-public-template" \
-                      --expectedBranchPrefix "${{ inputs.templatePrefix }}-public"
+                      --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
+                      --expectedBranchPrefix "${{ inputs.templatePrefix }}"
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    public-int-test-no-update-ref:
+    integration-public:
+        name: Integration test with public template
         runs-on: ubuntu-latest
         permissions:
             contents: write
             pull-requests: write
+
         steps:
-            # Create git client with PAT that has access to the private template
-            -   uses: actions/checkout@v4
-            -   name: setup git
+            -   name: Checkout code
+                uses: actions/checkout@v3
+
+            -   name: Setup git
                 run: |
                     git config user.name github-int-test
                     git config user.email github-int-test@github.com
-            -   name: install
-                run: |
-                    npm ci
-            -   name: bundle
-                run: |
-                    npm run bundle
+
+            -   name: Install dependencies
+                run: npm ci
+
+            -   name: Build
+                run: npm run build
+
             -   name: sync-private-repo
                 id: test_run
                 uses: ./
@@ -241,6 +149,7 @@ jobs:
                     branchPrefix: ${{ inputs.templatePrefix }}-public-update-ref
                     updateAfterRef: false
                     mockLocalConfig: "{}"
+
             -   name: assert
                 run: |
                     npx ts-node src/test-utils/confirm-repo-template.ts \
@@ -252,6 +161,7 @@ jobs:
                       --expectedBranchPrefix "${{ inputs.templatePrefix }}-public-update-ref"
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             -   name: clean
                 if: always()
                 run: |
