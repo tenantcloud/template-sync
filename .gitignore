@@ -6,8 +6,6 @@
 /vendor/
 /node_modules/
 /composer.lock
-/yarn.lock
-/package-lock.json
 
 # Build/coverage
 /build
