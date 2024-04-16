@@ -10,17 +10,17 @@ set of boilerplate for an npm package, you would probably provide an example pac
 
 ```json
 {
-  "name": "<fill in your package name",
-  "description": "<fill in your package description",
-  "license": "MIT",
-  "scripts": {
-    "build": "tsc",
-    "publish": "our-artifact-script"
-  },
-  "devDependencies": {
-    "typescript": "^5.0.0",
-    "our-artifact-package": "^1.0.0"
-  }
+	"name": "<fill in your package name",
+	"description": "<fill in your package description",
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"publish": "our-artifact-script"
+	},
+	"devDependencies": {
+		"typescript": "^5.0.0",
+		"our-artifact-package": "^1.0.0"
+	}
 }
 ```
 
@@ -31,22 +31,30 @@ plugin that is built-in with this library:
 
 ```json
 {
-  "merge": {
-    ".json": {
-      // This uses the default plugin for json merges
-      "rules": [
-        {
-          "glob": "package.json",
-          "options": {
-            "paths": [
-              ["$.scripts.publish", "merge-template"], // Any changes to publish are so critical that we want them to sync
-              ["$.devDependencies", "merge-template"] // Always ensure dev dependency versions for our scripts are updated
-            ]
-          }
-        }
-      ]
-    }
-  }
+	"merge": {
+		".json": {
+			// This uses the default plugin for json merges
+			"rules": [
+				{
+					"glob": "package.json",
+					"options": {
+						"paths": [
+							[
+								"$.scripts.publish",
+								"merge-template"
+							],
+							// Any changes to publish are so critical that we want them to sync
+							[
+								"$.devDependencies",
+								"merge-template"
+							]
+							// Always ensure dev dependency versions for our scripts are updated
+						]
+					}
+				}
+			]
+		}
+	}
 }
 ```
 
@@ -61,25 +69,29 @@ config file, they can specify their own merge configuration for the package.json
 
 ```json
 {
-  "merge": {
-    ".json": {
-      // This uses the default plugin for json merges
-      "rules": [
-        {
-          "glob": "package.json",
-          "options": {
-            "paths": [
-              ["$.devDependencies", "merge-template"] // Always ensure dev dependency versions for our scripts are updated
-            ]
-          }
-        }
-      ]
-    }
-  }
+	"merge": {
+		".json": {
+			// This uses the default plugin for json merges
+			"rules": [
+				{
+					"glob": "package.json",
+					"options": {
+						"paths": [
+							[
+								"$.devDependencies",
+								"merge-template"
+							]
+							// Always ensure dev dependency versions for our scripts are updated
+						]
+					}
+				}
+			]
+		}
+	}
 }
 ```
 
 This configuration will now override the template repo's merge and only allow devDependencies to be updated. We report
 this override as part of the output of the sync call, and for things like our
-[github action](https://github.com/HanseltimeIndustries/template-repo-sync-action), we format that output into the PR
+GitHub action, we format that output into the PR
 that is opened up when performing a sync.
