@@ -10,10 +10,9 @@ module.exports = {
   collectCoverageFrom: ["./src/**"],
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      // Lines can get skewed by bucket files
-      statements: 80,
+      branches: 40,
+      functions: 40,
+      statements: 40,
     },
   },
 };

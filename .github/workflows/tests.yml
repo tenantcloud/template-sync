@@ -90,7 +90,7 @@ jobs:
                     remoteRepoToken: ${{ secrets.PRIVATE_TEMPLATE_TEST_PAT }}
                     templateBranch: main
                     commitMsg: "build(boilerplate-int-test): synchronize template repo"
-                    branchPrefix: ${{ inputs.templatePrefix }}
+                    branchPrefix: ${{ github.head_ref }}
                     mockLocalConfig: "{}"
 
             -   name: assert
@@ -101,7 +101,7 @@ jobs:
                       --expectedFromBranch "main" \
                       --expectedFilesChanged "new_file.md" "package.json" "templatesync.json" "templatesync.local.json" \
                       --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
-                      --expectedBranchPrefix "${{ inputs.templatePrefix }}"
+                      --expectedBranchPrefix "${{ github.head_ref }}"
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -112,7 +112,7 @@ jobs:
                       --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
                       --expectedFromBranch "main" \
                       --expectedFromRepoPath "HanseltimeIndustries/test-private-template" \
-                      --expectedBranchPrefix "${{ inputs.templatePrefix }}"
+                      --expectedBranchPrefix "${{ github.head_ref }}"
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -146,7 +146,7 @@ jobs:
                     githubToken: ${{ secrets.GITHUB_TOKEN }}
                     templateBranch: main
                     commitMsg: "build(boilerplate-int-test): synchronize template repo"
-                    branchPrefix: ${{ inputs.templatePrefix }}-public-update-ref
+                    branchPrefix: ${{ github.head_ref }}-public-update-ref
                     updateAfterRef: false
                     mockLocalConfig: "{}"
 
@@ -158,7 +158,7 @@ jobs:
                       --expectedFromBranch "main" \
                       --expectedFilesChanged "new_file.md" "package.json" "templatesync.json" "templatesync.local.json" \
                       --expectedFromRepoPath "HanseltimeIndustries/test-public-template" \
-                      --expectedBranchPrefix "${{ inputs.templatePrefix }}-public-update-ref"
+                      --expectedBranchPrefix "${{ github.head_ref }}-public-update-ref"
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -169,6 +169,6 @@ jobs:
                       --expectedPullNumber "${{ steps.test_run.outputs.prNumber }}" \
                       --expectedFromBranch "main" \
                       --expectedFromRepoPath "HanseltimeIndustries/test-public-template" \
-                      --expectedBranchPrefix "${{ inputs.templatePrefix }}-public-update-ref"
+                      --expectedBranchPrefix "${{ github.head_ref }}-public-update-ref"
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
