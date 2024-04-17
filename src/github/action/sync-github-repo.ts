@@ -113,12 +113,8 @@ export async function syncGithubRepo(options: GithubOptions) {
 		prToBranch = resp.data.default_branch;
 	}
 
-	// Checkout the branch from the "to branch"
-	await git.fetch("origin", prToBranch);
-	await git.checkout(prToBranch);
-	// stash everything except "added" files since we will assume this means there's an intention
-	await git.stash(["--include-tracked"]);
 	console.log(`Checking out ${branchName}`);
+
 	await git.checkoutLocalBranch(branchName);
 	if (options.mockLocalConfig) {
 		await writeFile(
