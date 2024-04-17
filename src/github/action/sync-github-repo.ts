@@ -2,17 +2,12 @@ import * as github from "@actions/github";
 import * as core from "@actions/core";
 import { join } from "path";
 import { tmpdir } from "os";
-import { mkdtemp } from "fs/promises";
-import { execSync } from "child_process";
-import {
-	DEFAULT_BRANCH_PREFIX,
-	DEFAULT_COMMIT_MSG,
-	DEFAULT_TITLE_MSG,
-} from "./constants";
+import { mkdtemp, writeFile } from "fs/promises";
+import { DEFAULT_BRANCH_PREFIX, DEFAULT_COMMIT_MSG } from "./constants";
 import { getBranchName } from "./get-branch-name";
-import { writeFileSync } from "fs";
 import { TEMPLATE_SYNC_LOCAL_CONFIG, templateSync } from "../../template-sync";
 import { syncResultsToMd } from "../../formatting";
+import simpleGit from "simple-git";
 
 export interface GithubOptions {
 	/**
@@ -85,7 +80,9 @@ export async function syncGithubRepo(options: GithubOptions) {
 	const baseRepoUrl = `github.com/${options.repoPath}.git`;
 	const authedRepoUrl = `https://${options.remoteRepoToken ? `github_actions:${options.remoteRepoToken}@` : ""}${baseRepoUrl}`;
 
-	const branchName = getBranchName({
+	const git = simpleGit();
+
+	const branchName = await getBranchName({
 		branchPrefix,
 		templateBranch: options.templateBranch,
 		repoUrl: `https://${baseRepoUrl}`,
@@ -93,9 +90,8 @@ export async function syncGithubRepo(options: GithubOptions) {
 	});
 
 	// Check if the branch exists already and skip
-	const output = execSync(`git ls-remote --heads origin "${branchName}"`)
-		.toString()
-		.trim();
+	const output = await git.listRemote(["--heads", "origin", branchName]);
+
 	// Non-empty output means the branch exists
 	if (output) {
 		core.warning(
@@ -117,65 +113,52 @@ export async function syncGithubRepo(options: GithubOptions) {
 		prToBranch = resp.data.default_branch;
 	}
 
-	const origRef = execSync(
-		"git symbolic-ref --short -q HEAD ||  git rev-parse HEAD",
-	).toString();
-
-	try {
-		// Checkout the branch from the "to branch"
-		execSync(`git fetch origin ${prToBranch}`);
-		execSync(`git checkout ${prToBranch}`);
-		// stash everything except "added" files since we will assume this means there's an intention
-		execSync(`git stash --include-untracked`);
-		console.log(`Checking out ${branchName}`);
-		execSync(`git checkout -b ${branchName}`);
-		if (options.mockLocalConfig) {
-			writeFileSync(
-				join(repoRoot, `${TEMPLATE_SYNC_LOCAL_CONFIG}.json`),
-				options.mockLocalConfig,
-			);
-		}
-
-		// Clone and merge on this branch
-		const tempAppDir = await mkdtemp(join(getTempDir(), "template_sync_"));
-
-		console.log("Calling template sync...");
-		const result = await templateSync({
-			tmpCloneDir: tempAppDir,
-			repoDir: options.repoRoot ?? process.cwd(),
-			repoUrl: authedRepoUrl,
-			updateAfterRef: options.updateAfterRef,
-		});
-
-		console.log("Committing all files...");
-		// commit everything
-		execSync("git add .");
-		execSync(`git commit -m "${commitMsg}"`);
-		execSync(`git push --set-upstream origin "${branchName}"`);
-
-		console.log("Creating Pull Request...");
-		const resp = await octokit.rest.pulls.create({
-			owner: github.context.repo.owner,
-			repo: github.context.repo.repo,
-			head: branchName,
-			base: prToBranch,
-			title: DEFAULT_TITLE_MSG,
-			body: `
-    Template Synchronization Operation of ${baseRepoUrl} ${options.templateBranch}
-
-    ${syncResultsToMd(result)}
-    `,
-		});
-
-		core.setOutput("prNumber", resp.data.number);
-	} finally {
-		console.log(`Resetting to orignal ref: ${origRef}`);
-		execSync("git reset --hard");
-		execSync(`git checkout ${origRef}`);
-		// In case there were no changes
-		const stashStr = execSync(`git stash list`).toString();
-		if (stashStr.includes("stash@")) {
-			execSync(`git stash pop`);
-		}
+	// Checkout the branch from the "to branch"
+	await git.fetch("origin", prToBranch);
+	await git.checkout(prToBranch);
+	// stash everything except "added" files since we will assume this means there's an intention
+	await git.stash(["--include-tracked"]);
+	console.log(`Checking out ${branchName}`);
+	await git.checkoutLocalBranch(branchName);
+	if (options.mockLocalConfig) {
+		await writeFile(
+			join(repoRoot, `${TEMPLATE_SYNC_LOCAL_CONFIG}.json`),
+			options.mockLocalConfig,
+		);
 	}
+
+	// Clone and merge on this branch
+	const tempAppDir = await mkdtemp(join(getTempDir(), "template_sync_"));
+
+	console.log("Calling template sync...");
+	const result = await templateSync({
+		tmpCloneDir: tempAppDir,
+		repoDir: options.repoRoot ?? process.cwd(),
+		repoUrl: authedRepoUrl,
+		updateAfterRef: options.updateAfterRef,
+	});
+
+	console.log("Committing all files...");
+	// commit everything
+	await git.add(".");
+	await git.commit(commitMsg);
+	await git.push(["-u", "origin", branchName]);
+
+	const syncResultsAsText = `
+Template Synchronization Operation of ${baseRepoUrl} ${options.templateBranch}
+
+${syncResultsToMd(result)}
+`;
+
+	console.log("Creating Pull Request...");
+	// const resp = await octokit.rest.pulls.create({
+	// 	owner: github.context.repo.owner,
+	// 	repo: github.context.repo.repo,
+	// 	head: branchName,
+	// 	base: prToBranch,
+	// 	title: DEFAULT_TITLE_MSG,
+	// 	body: syncResultsAsText,
+	// });
+	//
+	// core.setOutput("prNumber", resp.data.number);
 }

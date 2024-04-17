@@ -1,16 +1,13 @@
-import { join } from "path";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { join, resolve } from "path";
+import { access, readFile, writeFile } from "fs/promises";
 import { getAllFilesInDir } from "./match";
 import { Config, LocalConfig } from "./types";
 import { mergeFile } from "./merge-file";
-import { gitClone } from "./clone-drivers/git-clone";
 import { Change } from "diff";
-import { TemplateCloneDriverFn } from "./clone-drivers";
-import { TemplateDiffDriverFn, gitDiff } from "./diff-drivers";
-import { gitCurrentRef } from "./ref-drivers";
-import { TemplateRefDriverFn } from "./ref-drivers/types";
 import { inferJSONIndent } from "./formatting";
 import * as commentJSON from "comment-json";
+import simpleGit, { SimpleGitFactory } from "simple-git";
+import { pathExists } from "fs-extra";
 
 export interface TemplateSyncOptions {
 	repoUrl: string;
@@ -31,20 +28,7 @@ export interface TemplateSyncOptions {
 	 */
 	updateAfterRef?: boolean;
 
-	/**
-	 * Defaults to using git clone
-	 */
-	cloneDriver?: TemplateCloneDriverFn;
-
-	/**
-	 * Defaults to using git diff
-	 */
-	diffDriver?: TemplateDiffDriverFn;
-
-	/**
-	 * Defaults to using git current ref
-	 */
-	currentRefDriver?: TemplateRefDriverFn;
+	gitFactory?: SimpleGitFactory;
 }
 
 export interface TemplateSyncReturn {
@@ -69,19 +53,19 @@ export const TEMPLATE_SYNC_LOCAL_CONFIG = "templatesync.local";
 export async function templateSync(
 	options: TemplateSyncOptions,
 ): Promise<TemplateSyncReturn> {
-	const cloneDriver = options.cloneDriver ?? gitClone;
-	const diffDriver = options.diffDriver ?? gitDiff;
-	const currentRefDriver = options.currentRefDriver ?? gitCurrentRef;
-	const tempCloneDir = await cloneDriver(
-		options.tmpCloneDir,
-		options.repoUrl,
-	);
+	const gitFactory = options.gitFactory || simpleGit;
+
+	await gitFactory(options.tmpCloneDir)
+		.env(process.env)
+		.clone(options.repoUrl, "cloned_repo");
+	const tempCloneDir = resolve(options.tmpCloneDir, "cloned_repo");
+	const cloneGit = gitFactory(tempCloneDir);
 
 	// Get the clone Config
 	const cloneConfigPath = join(tempCloneDir, `${TEMPLATE_SYNC_CONFIG}.json`);
-	const templateSyncConfig: Config = existsSync(cloneConfigPath)
+	const templateSyncConfig: Config = (await pathExists(cloneConfigPath))
 		? (commentJSON.parse(
-				readFileSync(cloneConfigPath).toString(),
+				(await readFile(cloneConfigPath)).toString(),
 			) as unknown as Config)
 		: { ignore: [] };
 
@@ -89,20 +73,24 @@ export async function templateSync(
 		options.repoDir,
 		`${TEMPLATE_SYNC_LOCAL_CONFIG}.json`,
 	);
-	const localTemplateSyncConfig: LocalConfig = existsSync(localConfigPath)
+	const localTemplateSyncConfig: LocalConfig = (await pathExists(
+		localConfigPath,
+	))
 		? (commentJSON.parse(
-				readFileSync(localConfigPath).toString(),
+				(await readFile(localConfigPath)).toString(),
 			) as unknown as LocalConfig)
 		: { ignore: [] };
 
 	let filesToSync: string[];
 	if (localTemplateSyncConfig.afterRef) {
-		filesToSync = await diffDriver(
-			tempCloneDir,
-			localTemplateSyncConfig.afterRef,
-		);
+		filesToSync = (
+			await cloneGit.diff([
+				`${localTemplateSyncConfig.afterRef}..`,
+				"--name-only",
+			])
+		).split("\n");
 	} else {
-		filesToSync = getAllFilesInDir(tempCloneDir, [
+		filesToSync = await getAllFilesInDir(tempCloneDir, [
 			...templateSyncConfig.ignore,
 			".git/**",
 		]);
@@ -131,22 +119,20 @@ export async function templateSync(
 
 	// apply after ref
 	if (options.updateAfterRef) {
-		const ref = await currentRefDriver({
-			rootDir: tempCloneDir,
-		});
+		const ref = await cloneGit.revparse("HEAD");
 
-		if (existsSync(localConfigPath)) {
-			const configStr = readFileSync(localConfigPath).toString();
+		if (await pathExists(localConfigPath)) {
+			const configStr = (await readFile(localConfigPath)).toString();
 			const config = commentJSON.parse(
 				configStr,
 			) as unknown as LocalConfig;
 			config.afterRef = ref;
-			writeFileSync(
+			await writeFile(
 				localConfigPath,
 				commentJSON.stringify(config, null, inferJSONIndent(configStr)),
 			);
 		} else {
-			writeFileSync(
+			await writeFile(
 				localConfigPath,
 				commentJSON.stringify({ afterRef: ref }, null, 4),
 			);

@@ -18,7 +18,8 @@
 		"jsonpath": "^1.1.1",
 		"lodash.merge": "^4.6.2",
 		"micromatch": "^4.0.5",
-		"octokit": "^3.2.0"
+		"octokit": "^3.2.0",
+		"simple-git": "^3.24.0"
 	},
 	"devDependencies": {
 		"@commitlint/config-angular": "^19.0.3",

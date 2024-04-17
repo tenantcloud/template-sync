@@ -1,11 +1,10 @@
 import { isMatch, some } from "micromatch";
 import { Config, MergeContext, MergePlugin } from "./types";
 import { extname, join } from "path";
-import { existsSync } from "fs";
-import { readFile } from "fs/promises";
+import { readFile, access } from "fs/promises";
 import { loadPlugin } from "./load-plugin";
 import { Change, diffLines } from "diff";
-import { outputFile } from "fs-extra";
+import { outputFile, pathExists } from "fs-extra";
 
 interface MergeFileOptions {
 	localTemplateSyncConfig: Config;
@@ -57,7 +56,7 @@ export async function mergeFile(
 	// Either write the merge or write
 	let fileContents: string;
 	const localChanges: Change[] = [];
-	if (existsSync(filePath) && (mergeConfig || localMergeConfig)) {
+	if ((await pathExists(filePath)) && (mergeConfig || localMergeConfig)) {
 		const originalCurrentFile = (await readFile(filePath)).toString();
 		if (mergeConfig) {
 			// Apply the template's most recent merges

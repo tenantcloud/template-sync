@@ -1,9 +1,8 @@
-import { copy } from "fs-extra";
-import { mkdtemp, readFile, rm } from "fs/promises";
+import { copy, pathExists } from "fs-extra";
+import { access, mkdtemp, readFile, writeFile, rm } from "fs/promises";
 import { templateSync } from "./template-sync";
 import { tempDir, TEST_FIXTURES_DIR } from "./test-utils";
 import { join, resolve } from "path";
-import { existsSync, readFileSync, writeFileSync } from "fs";
 
 // Just return the test-fixture directory
 const dummyCloneDriver = async () => {
@@ -45,8 +44,12 @@ describe("templateSync", () => {
 		await fileMatchTemplate(emptyTmpDir, "src/templated.ts");
 
 		// Expect the ignores to not be a problem
-		expect(existsSync(resolve(emptyTmpDir, "src/index.ts"))).toBeFalsy();
-		expect(existsSync(resolve(emptyTmpDir, "src/custom-bin"))).toBeFalsy();
+		expect(
+			await pathExists(resolve(emptyTmpDir, "src/index.ts")),
+		).toBeFalsy();
+		expect(
+			await pathExists(resolve(emptyTmpDir, "src/custom-bin")),
+		).toBeFalsy();
 	});
 	it("appropriately merges according to just the templatesync config file in an existing repo", async () => {
 		// Remove the local sync overrides
@@ -66,7 +69,7 @@ describe("templateSync", () => {
 		await fileMatchTemplate(tmpDir, "templatesync.json");
 		await fileMatchTemplate(tmpDir, "src/templated.ts");
 		const packageJson = JSON.parse(
-			readFileSync(resolve(tmpDir, "package.json")).toString(),
+			(await readFile(resolve(tmpDir, "package.json"))).toString(),
 		);
 
 		expect(packageJson).toEqual({
@@ -98,7 +101,7 @@ describe("templateSync", () => {
 		// Remove the local sync overrides
 		await rm(join(tmpDir, "templatesync.local.json"));
 
-		writeFileSync(
+		await writeFile(
 			join(tmpDir, "templatesync.local.json"),
 			JSON.stringify({
 				ignore: [
@@ -141,7 +144,7 @@ describe("templateSync", () => {
 		await fileMatchTemplate(tmpDir, "templatesync.json");
 		await fileMatchDownstream(tmpDir, "src/templated.ts");
 		const packageJson = JSON.parse(
-			readFileSync(resolve(tmpDir, "package.json")).toString(),
+			(await readFile(resolve(tmpDir, "package.json"))).toString(),
 		);
 
 		// The plugin nuked this
@@ -157,7 +160,7 @@ describe("templateSync", () => {
 		// Remove the local sync overrides
 		await rm(join(tmpDir, "templatesync.local.json"));
 
-		writeFileSync(
+		await writeFile(
 			join(tmpDir, "templatesync.local.json"),
 			JSON.stringify({
 				afterRef: "dummySha",
@@ -204,7 +207,7 @@ describe("templateSync", () => {
 			],
 		};
 
-		writeFileSync(
+		await writeFile(
 			join(tmpDir, "templatesync.local.json"),
 			JSON.stringify(mockLocalConfig),
 		);
@@ -278,7 +281,7 @@ describe("templateSync", () => {
 		await fileMatchTemplate(tmpDir, "templatesync.json");
 		await fileMatchTemplate(tmpDir, "src/templated.ts");
 		const packageJson = JSON.parse(
-			readFileSync(resolve(tmpDir, "package.json")).toString(),
+			(await readFile(resolve(tmpDir, "package.json"))).toString(),
 		);
 
 		expect(packageJson).toEqual({

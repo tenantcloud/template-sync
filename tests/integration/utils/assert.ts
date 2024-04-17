@@ -83,7 +83,7 @@ async function main(options: IntTestCheckOptions) {
 
 	const repoUrl = `https://github.com/${options.expectedFromRepoPath}`;
 	console.log("branchPrefix" + options.expectedBranchPrefix);
-	const expectedBranchName = getBranchName({
+	const expectedBranchName = await getBranchName({
 		repoUrl,
 		repoRoot: options.expectedRepoRoot,
 		branchPrefix: options.expectedBranchPrefix,

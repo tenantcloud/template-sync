@@ -1,8 +1,9 @@
-import { execSync } from "child_process";
 import { createHash } from "crypto";
-import { existsSync, readFileSync } from "fs";
+import { access, readFile } from "fs/promises";
 import { resolve } from "path";
 import { TEMPLATE_SYNC_LOCAL_CONFIG } from "../../template-sync";
+import simpleGit from "simple-git";
+import { pathExists } from "fs-extra";
 
 interface GetBranchNameOptions {
 	templateBranch: string;
@@ -11,11 +12,11 @@ interface GetBranchNameOptions {
 	branchPrefix: string;
 }
 
-export function getBranchName(options: GetBranchNameOptions) {
+export async function getBranchName(options: GetBranchNameOptions) {
 	const { branchPrefix, repoRoot, repoUrl, templateBranch } = options;
-	const shaLine = execSync(`git ls-remote "${repoUrl}" "${templateBranch}"`)
-		.toString()
-		.split(" ")[0];
+	const shaLine = (
+		await simpleGit().listRemote([repoUrl, templateBranch])
+	).split(" ")[0];
 	const match = /^(?<hash>[^\s]+)\s/.exec(shaLine);
 	const templateSha = match?.groups?.hash;
 	if (!templateSha) {
@@ -25,9 +26,11 @@ export function getBranchName(options: GetBranchNameOptions) {
 	}
 
 	let configHash: string;
-	if (existsSync(resolve(repoRoot, TEMPLATE_SYNC_LOCAL_CONFIG))) {
+	if (await pathExists(resolve(repoRoot, TEMPLATE_SYNC_LOCAL_CONFIG))) {
 		configHash = createHash("sha256")
-			.update(readFileSync(resolve(repoRoot, TEMPLATE_SYNC_LOCAL_CONFIG)))
+			.update(
+				await readFile(resolve(repoRoot, TEMPLATE_SYNC_LOCAL_CONFIG)),
+			)
 			.digest("hex")
 			.slice(0, 8);
 	} else {

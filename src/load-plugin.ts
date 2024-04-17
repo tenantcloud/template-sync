@@ -1,7 +1,8 @@
 import { defaultExtensionMap } from "./plugins";
 import { MergeConfig, MergePlugin } from "./types";
-import { existsSync } from "fs";
 import { resolve } from "path";
+import { access } from "fs/promises";
+import { pathExists } from "fs-extra";
 
 export async function loadPlugin<T>(
 	mergeConfig: MergeConfig<T>,
@@ -12,7 +13,7 @@ export async function loadPlugin<T>(
 	if (mergeConfig.plugin) {
 		// First check if this is a loal .js file
 		const localPath = resolve(configDir, mergeConfig.plugin);
-		const importPath = existsSync(localPath)
+		const importPath = (await pathExists(localPath))
 			? localPath
 			: mergeConfig.plugin;
 		try {

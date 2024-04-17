@@ -2,7 +2,7 @@ import { join, resolve } from "path";
 import { mergeFile } from "./merge-file";
 import { tempDir, TEST_FIXTURES_DIR } from "./test-utils";
 import { mkdtemp, readFile, rm } from "fs/promises";
-import { copySync } from "fs-extra";
+import { copy } from "fs-extra";
 import { JsonFileMergeOptions } from "./types";
 
 const testTemplateDir = resolve(TEST_FIXTURES_DIR, "template");
@@ -12,7 +12,7 @@ describe("mergeFile", () => {
 	let tmpDir: string;
 	beforeEach(async () => {
 		tmpDir = await mkdtemp(tempDir());
-		copySync(testDownstreamDir, tmpDir);
+		await copy(testDownstreamDir, tmpDir);
 	});
 	afterEach(async () => {
 		await rm(tmpDir, {

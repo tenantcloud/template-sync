@@ -1,6 +1,6 @@
-import { readdirSync } from "fs";
 import { some } from "micromatch";
 import { join } from "path";
+import { readdir } from "fs/promises";
 
 export function invertMatchPatterns(patterns: string[]) {
 	return patterns.map((pattern) => {
@@ -14,43 +14,43 @@ export function invertMatchPatterns(patterns: string[]) {
 /**
  * Gets all the files in the directory recursively while avoiding any micromatch patterns
  * that would match for ignoring
- *
- * @param dir
- * @param ignorePatterns
- * @returns
  */
-export function getAllFilesInDir(
+export async function getAllFilesInDir(
 	dir: string,
 	ignorePatterns: string[],
-): string[] {
-	return recurseDirsForFiles(dir, ignorePatterns);
+): Promise<string[]> {
+	return await recurseDirsForFiles(dir, ignorePatterns);
 }
 
-function recurseDirsForFiles(
+async function recurseDirsForFiles(
 	dirpath: string,
 	ignorePatterns: string[],
 	relativeRoot = "",
-): string[] {
-	return readdirSync(dirpath, {
+): Promise<string[]> {
+	let files: string[] = [];
+
+	for (const f of await readdir(dirpath, {
 		withFileTypes: true,
-	}).reduce((files, f) => {
+	})) {
 		const relPath = join(relativeRoot, f.name);
+
 		if (some(relPath, ignorePatterns)) {
-			return files;
+			continue;
 		}
 
 		// Ensure we aren't ignoring these folders explicitly
 		if (f.isDirectory()) {
 			files.push(
-				...recurseDirsForFiles(
+				...(await recurseDirsForFiles(
 					join(dirpath, f.name),
 					ignorePatterns,
 					relPath,
-				),
+				)),
 			);
 		} else {
 			files.push(relPath);
 		}
-		return files;
-	}, [] as string[]);
+	}
+
+	return files;
 }

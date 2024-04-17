@@ -5,8 +5,8 @@ import { TEST_FIXTURES_DIR } from "./test-utils";
 const TEST_GLOB_DIR = resolve(TEST_FIXTURES_DIR, "glob-test");
 
 describe("getAllFilesInDir", () => {
-	it("gets all files in the directory with no ignores", () => {
-		const files = getAllFilesInDir(TEST_GLOB_DIR, []);
+	it("gets all files in the directory with no ignores", async () => {
+		const files = await getAllFilesInDir(TEST_GLOB_DIR, []);
 		expect(files).toEqual(
 			expect.arrayContaining([
 				"folder1/something.js",
@@ -22,8 +22,8 @@ describe("getAllFilesInDir", () => {
 			throw err;
 		}
 	});
-	it("gets all files in the directory that do not match the ignore (single)", () => {
-		const files = getAllFilesInDir(TEST_GLOB_DIR, ["**/*.ts"]);
+	it("gets all files in the directory that do not match the ignore (single)", async () => {
+		const files = await getAllFilesInDir(TEST_GLOB_DIR, ["**/*.ts"]);
 		expect(files).toEqual(
 			expect.arrayContaining([
 				"folder1/something.js",
@@ -38,8 +38,11 @@ describe("getAllFilesInDir", () => {
 			throw err;
 		}
 	});
-	it("gets all files in the directory that do not match the ignore (multiple)", () => {
-		const files = getAllFilesInDir(TEST_GLOB_DIR, ["**/*.ts", "**/*.txt"]);
+	it("gets all files in the directory that do not match the ignore (multiple)", async () => {
+		const files = await getAllFilesInDir(TEST_GLOB_DIR, [
+			"**/*.ts",
+			"**/*.txt",
+		]);
 		expect(files).toEqual(
 			expect.arrayContaining(["folder1/something.js", "toplevel.js"]),
 		);
@@ -51,8 +54,8 @@ describe("getAllFilesInDir", () => {
 		}
 	});
 
-	it("gets all files in the directory that do not match the ignore with a folder level directive (multiple)", () => {
-		const files = getAllFilesInDir(TEST_GLOB_DIR, [
+	it("gets all files in the directory that do not match the ignore with a folder level directive (multiple)", async () => {
+		const files = await getAllFilesInDir(TEST_GLOB_DIR, [
 			"**/*.ts",
 			"**/*.txt",
 			"folder1",
