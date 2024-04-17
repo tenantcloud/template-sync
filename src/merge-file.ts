@@ -1,7 +1,7 @@
 import { isMatch, some } from "micromatch";
 import { Config, MergeContext, MergePlugin } from "./types";
 import { extname, join } from "path";
-import { readFile, access } from "fs/promises";
+import { readFile } from "fs/promises";
 import { loadPlugin } from "./load-plugin";
 import { Change, diffLines } from "diff";
 import { outputFile, pathExists } from "fs-extra";

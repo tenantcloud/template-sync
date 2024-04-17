@@ -150,7 +150,7 @@ Template Synchronization Operation of ${baseRepoUrl} ${options.templateBranch}
 ${syncResultsToMd(result)}
 `;
 
-	console.log("Creating Pull Request...");
+	console.log(`Creating Pull Request...: ${syncResultsAsText}`);
 	// const resp = await octokit.rest.pulls.create({
 	// 	owner: github.context.repo.owner,
 	// 	repo: github.context.repo.repo,

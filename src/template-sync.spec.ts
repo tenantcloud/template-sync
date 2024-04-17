@@ -1,24 +1,44 @@
 import { copy, pathExists } from "fs-extra";
-import { access, mkdtemp, readFile, writeFile, rm } from "fs/promises";
+import { mkdtemp, readFile, writeFile, rm } from "fs/promises";
 import { templateSync } from "./template-sync";
 import { tempDir, TEST_FIXTURES_DIR } from "./test-utils";
 import { join, resolve } from "path";
+import {
+	DiffResult,
+	DiffResultTextFile,
+	SimpleGit,
+} from "simple-git";
 
-// Just return the test-fixture directory
-const dummyCloneDriver = async () => {
-	return resolve(TEST_FIXTURES_DIR, "template");
+const templateDir = resolve(TEST_FIXTURES_DIR, "template");
+const downstreamDir = resolve(TEST_FIXTURES_DIR, "downstream");
+
+const dummyCloneDriver = async (repo: string, path: string) => {
+	await copy(templateDir, path);
 };
 
-const downstreamDir = resolve(TEST_FIXTURES_DIR, "downstream");
+const dummyDiffDriver = (files: string[]) => async (): Promise<DiffResult> => ({
+	changed: files.length,
+	files: files.map((file) => ({
+		file,
+	})) as unknown as DiffResultTextFile[],
+	insertions: files.length,
+	deletions: files.length,
+});
 
 describe("templateSync", () => {
 	let tmpDir: string;
+	let tmpCloneDir: string;
 	beforeEach(async () => {
 		tmpDir = await mkdtemp(tempDir());
+		tmpCloneDir = await mkdtemp(tempDir());
 		await copy(downstreamDir, tmpDir);
 	});
 	afterEach(async () => {
 		await rm(tmpDir, {
+			force: true,
+			recursive: true,
+		});
+		await rm(tmpCloneDir, {
 			force: true,
 			recursive: true,
 		});
@@ -27,10 +47,16 @@ describe("templateSync", () => {
 		const emptyTmpDir = await mkdtemp(tempDir());
 		expect(
 			await templateSync({
-				tmpCloneDir: "stubbed-by-driver",
-				cloneDriver: dummyCloneDriver,
+				tmpCloneDir: tmpCloneDir,
 				repoUrl: "not-important",
 				repoDir: emptyTmpDir,
+				gitFactory: () =>
+					({
+						env() {
+							return this;
+						},
+						clone: dummyCloneDriver,
+					}) as unknown as SimpleGit,
 			}),
 		).toEqual({
 			// Expect no changes since there was no local sync file
@@ -56,10 +82,16 @@ describe("templateSync", () => {
 		await rm(join(tmpDir, "templatesync.local.json"));
 
 		const result = await templateSync({
-			tmpCloneDir: "stubbed-by-driver",
-			cloneDriver: dummyCloneDriver,
+			tmpCloneDir: tmpCloneDir,
 			repoUrl: "not-important",
 			repoDir: tmpDir,
+			gitFactory: () =>
+				({
+					env() {
+						return this;
+					},
+					clone: dummyCloneDriver,
+				}) as unknown as SimpleGit,
 		});
 
 		expect(result.localSkipFiles).toEqual([]);
@@ -126,10 +158,16 @@ describe("templateSync", () => {
 		);
 
 		const result = await templateSync({
-			tmpCloneDir: "stubbed-by-driver",
-			cloneDriver: dummyCloneDriver,
+			tmpCloneDir: tmpCloneDir,
 			repoUrl: "not-important",
 			repoDir: tmpDir,
+			gitFactory: () =>
+				({
+					env() {
+						return this;
+					},
+					clone: dummyCloneDriver,
+				}) as unknown as SimpleGit,
 		});
 
 		expect(result.localSkipFiles).toEqual(["src/templated.ts"]);
@@ -172,15 +210,18 @@ describe("templateSync", () => {
 		);
 
 		// We will only update the templated.ts
-		const mockDiffDriver = jest
-			.fn()
-			.mockImplementation(async () => ["src/templated.ts"]);
 		const result = await templateSync({
-			tmpCloneDir: "stubbed-by-driver",
-			cloneDriver: dummyCloneDriver,
+			tmpCloneDir: tmpCloneDir,
 			repoUrl: "not-important",
 			repoDir: tmpDir,
-			diffDriver: mockDiffDriver,
+			gitFactory: () =>
+				({
+					env() {
+						return this;
+					},
+					clone: dummyCloneDriver,
+					diffSummary: dummyDiffDriver(["src/templated.ts"]),
+				}) as unknown as SimpleGit,
 		});
 
 		// since there was no override for this file, not changes from the local file
@@ -213,20 +254,23 @@ describe("templateSync", () => {
 		);
 
 		// We will only update the templated.ts
-		const mockDiffDriver = jest
-			.fn()
-			.mockImplementation(async () => ["src/templated.ts"]);
 		const mockCurrentRefDriver = jest
 			.fn()
 			.mockImplementation(async () => "newestSha");
 		const result = await templateSync({
-			tmpCloneDir: "stubbed-by-driver",
-			cloneDriver: dummyCloneDriver,
+			tmpCloneDir: tmpCloneDir,
 			repoUrl: "not-important",
 			repoDir: tmpDir,
 			updateAfterRef: true,
-			diffDriver: mockDiffDriver,
-			currentRefDriver: mockCurrentRefDriver,
+			gitFactory: () =>
+				({
+					env() {
+						return this;
+					},
+					clone: dummyCloneDriver,
+					diffSummary: dummyDiffDriver(["src/templated.ts"]),
+					revparse: mockCurrentRefDriver,
+				}) as unknown as SimpleGit,
 		});
 
 		// since there was no override for this file, not changes from the local file
@@ -258,20 +302,23 @@ describe("templateSync", () => {
 		await rm(join(tmpDir, "templatesync.local.json"));
 
 		// We will only update the templated.ts
-		const mockDiffDriver = jest
-			.fn()
-			.mockImplementation(async () => ["src/templated.ts"]);
 		const mockCurrentRefDriver = jest
 			.fn()
 			.mockImplementation(async () => "newestSha");
 		const result = await templateSync({
-			tmpCloneDir: "stubbed-by-driver",
-			cloneDriver: dummyCloneDriver,
+			tmpCloneDir: tmpCloneDir,
 			repoUrl: "not-important",
 			repoDir: tmpDir,
 			updateAfterRef: true,
-			diffDriver: mockDiffDriver,
-			currentRefDriver: mockCurrentRefDriver,
+			gitFactory: () =>
+				({
+					env() {
+						return this;
+					},
+					clone: dummyCloneDriver,
+					diffSummary: dummyDiffDriver(["src/templated.ts"]),
+					revparse: mockCurrentRefDriver,
+				}) as unknown as SimpleGit,
 		});
 
 		// since there was no override for this file, not changes from the local file
@@ -336,8 +383,7 @@ async function fileMatch(
 	relPath: string,
 	source: "downstream" | "template",
 ) {
-	const dir =
-		source === "downstream" ? downstreamDir : await dummyCloneDriver();
+	const dir = source === "downstream" ? downstreamDir : templateDir;
 	expect((await readFile(resolve(tmpDir, relPath))).toString()).toEqual(
 		(await readFile(resolve(dir, relPath))).toString(),
 	);

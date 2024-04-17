@@ -1,7 +1,6 @@
 import { defaultExtensionMap } from "./plugins";
 import { MergeConfig, MergePlugin } from "./types";
 import { resolve } from "path";
-import { access } from "fs/promises";
 import { pathExists } from "fs-extra";
 
 export async function loadPlugin<T>(

@@ -1,5 +1,5 @@
 import { join, resolve } from "path";
-import { access, readFile, writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { getAllFilesInDir } from "./match";
 import { Config, LocalConfig } from "./types";
 import { mergeFile } from "./merge-file";
@@ -55,10 +55,8 @@ export async function templateSync(
 ): Promise<TemplateSyncReturn> {
 	const gitFactory = options.gitFactory || simpleGit;
 
-	await gitFactory(options.tmpCloneDir)
-		.env(process.env)
-		.clone(options.repoUrl, "cloned_repo");
 	const tempCloneDir = resolve(options.tmpCloneDir, "cloned_repo");
+	await gitFactory().env(process.env).clone(options.repoUrl, tempCloneDir);
 	const cloneGit = gitFactory(tempCloneDir);
 
 	// Get the clone Config
@@ -84,11 +82,11 @@ export async function templateSync(
 	let filesToSync: string[];
 	if (localTemplateSyncConfig.afterRef) {
 		filesToSync = (
-			await cloneGit.diff([
+			await cloneGit.diffSummary([
 				`${localTemplateSyncConfig.afterRef}..`,
 				"--name-only",
 			])
-		).split("\n");
+		).files.map((file) => file.file);
 	} else {
 		filesToSync = await getAllFilesInDir(tempCloneDir, [
 			...templateSyncConfig.ignore,

@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { access, readFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import { resolve } from "path";
 import { TEMPLATE_SYNC_LOCAL_CONFIG } from "../../template-sync";
 import simpleGit from "simple-git";

@@ -27,7 +27,7 @@ async function recurseDirsForFiles(
 	ignorePatterns: string[],
 	relativeRoot = "",
 ): Promise<string[]> {
-	let files: string[] = [];
+	const files: string[] = [];
 
 	for (const f of await readdir(dirpath, {
 		withFileTypes: true,
