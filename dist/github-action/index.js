@@ -41510,21 +41510,6 @@ module.exports = webpackEmptyAsyncContext;
 
 /***/ }),
 
-/***/ 5086:
-/***/ ((module) => {
-
-function webpackEmptyContext(req) {
-	var e = new Error("Cannot find module '" + req + "'");
-	e.code = 'MODULE_NOT_FOUND';
-	throw e;
-}
-webpackEmptyContext.keys = () => ([]);
-webpackEmptyContext.resolve = webpackEmptyContext;
-webpackEmptyContext.id = 5086;
-module.exports = webpackEmptyContext;
-
-/***/ }),
-
 /***/ 9491:
 /***/ ((module) => {
 
@@ -43399,6 +43384,10 @@ var __webpack_exports__ = {};
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: external "os"
 var external_os_ = __nccwpck_require__(2037);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(1017);
+;// CONCATENATED MODULE: external "node:crypto"
+const external_node_crypto_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:crypto");
 ;// CONCATENATED MODULE: external "node:process"
 const external_node_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:process");
 ;// CONCATENATED MODULE: external "node:fs"
@@ -44082,8 +44071,6 @@ const generateGlobTasksSync = normalizeArgumentsSync(generateTasksSync);
 
 const {convertPathToPattern} = out;
 
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require__(1017);
 // EXTERNAL MODULE: ./node_modules/remeda/dist/commonjs/index.js
 var commonjs = __nccwpck_require__(8886);
 ;// CONCATENATED MODULE: ./src/repositories/repository.ts
@@ -44098,13 +44085,11 @@ class Repository {
     path(relative) {
         return (0,external_path_.join)(this.root, relative);
     }
-    async files(patterns = ['**/*'], ignore = []) {
+    async files(patterns = ["**/*"], ignore = []) {
         return commonjs.difference.multiset(await globby(patterns, { cwd: this.root }), ignore);
     }
 }
 
-;// CONCATENATED MODULE: external "node:crypto"
-const external_node_crypto_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:crypto");
 ;// CONCATENATED MODULE: ./src/repositories/cloning.ts
 
 
@@ -44118,21 +44103,21 @@ class GitRepositoryCloner {
     }
     async clone(url, branch) {
         const destination = (0,external_path_.resolve)(this.tmpDir, (0,external_node_crypto_namespaceObject.randomUUID)());
-        await this.git.clone(url, destination, ['--branch', branch]);
+        await this.git.clone(url, destination, ["--branch", branch]);
         return new Repository(destination);
     }
 }
 class GitHubRepositoryCloner {
     token;
     delegate;
-    constructor(token = null, delegate) {
+    constructor(token, delegate) {
         this.token = token;
         this.delegate = delegate;
     }
     async clone(url, branch) {
-        if (this.token && url.includes('https://github.com')) {
+        if (this.token && url.includes("https://github.com")) {
             const authToken = `github_actions:${this.token}@`;
-            url = url.replace('https://github.com', `https://${authToken}github.com`);
+            url = url.replace("https://github.com", `https://${authToken}github.com`);
         }
         return await this.delegate.clone(url, branch);
     }
@@ -52932,17 +52917,25 @@ const configSchema = z.strictObject({
     repositories: z.array(z.strictObject({
         url: z.string().min(1),
         branch: z.string().min(1),
-        plugins: z.array(z.union([
-            z.string().min(1),
-            z.object({
-                name: z.string().min(1),
-            })
-        ])).min(1),
-    })).min(1),
+    }))
+        .min(1),
+});
+const pluginsConfigSchema = z.strictObject({
+    plugins: z.array(z.union([
+        z.string().min(1),
+        z.object({
+            name: z.string().min(1),
+        }),
+    ]))
+        .min(1),
 });
 async function loadConfig(root) {
-    const rawConfig = await readJson((0,external_path_.join)(root, 'template-sync.json'));
+    const rawConfig = await readJson((0,external_path_.join)(root, "template-sync.json"));
     return configSchema.parse(rawConfig);
+}
+async function loadPluginsConfig(root) {
+    const rawConfig = await readJson((0,external_path_.join)(root, "template-sync.plugins.json"));
+    return pluginsConfigSchema.parse(rawConfig);
 }
 
 // EXTERNAL MODULE: ./node_modules/fs-extra/lib/index.js
@@ -52952,10 +52945,10 @@ var lib = __nccwpck_require__(5630);
 
 
 const optionsSchema = z.strictObject({
-    filter: z.array(z.string()).default(['**/*']),
+    filter: z.array(z.string()).default(["**/*"]),
     deleteExtra: z.boolean().default(true),
 });
-/* harmony default export */ const sync = (rawOptions => {
+/* harmony default export */ const sync = ((rawOptions) => {
     const options = optionsSchema.parse(rawOptions);
     return async function (template, source, reserved) {
         const templateFiles = await template.files(options.filter, reserved);
@@ -52978,28 +52971,28 @@ const optionsSchema = z.strictObject({
 
 
 const composer_optionsSchema = z.strictObject({});
-/* harmony default export */ const composer = (rawOptions => {
+/* harmony default export */ const composer = ((rawOptions) => {
     composer_optionsSchema.parse(rawOptions);
     return async function (template, source) {
-        const templateComposerJson = await readJson(template.path('composer.json'));
-        const sourceComposerJson = await readJson(source.path('composer.json'));
-        await writeJson(source.path('composer.json'), {
+        const templateComposerJson = await readJson(template.path("composer.json"));
+        const sourceComposerJson = await readJson(source.path("composer.json"));
+        await writeJson(source.path("composer.json"), {
             ...sourceComposerJson,
-            'require': {
-                ...sourceComposerJson['require'],
-                ...templateComposerJson['require'],
+            require: {
+                ...sourceComposerJson["require"],
+                ...templateComposerJson["require"],
             },
-            'require-dev': {
-                ...sourceComposerJson['require-dev'],
-                ...templateComposerJson['require-dev'],
+            "require-dev": {
+                ...sourceComposerJson["require-dev"],
+                ...templateComposerJson["require-dev"],
             },
-            'scripts': {
-                ...sourceComposerJson['scripts'],
-                ...templateComposerJson['scripts'],
+            scripts: {
+                ...sourceComposerJson["scripts"],
+                ...templateComposerJson["scripts"],
             },
         });
         return {
-            reserved: ['composer.json'],
+            reserved: ["composer.json"],
         };
     };
 });
@@ -53017,7 +53010,7 @@ const standardPlugins = {
 
 
 async function loadPlugin(pluginConfig, repositoryRoot) {
-    if (typeof pluginConfig === 'string') {
+    if (typeof pluginConfig === "string") {
         pluginConfig = {
             name: pluginConfig,
         };
@@ -53033,39 +53026,22 @@ async function loadPluginFactory(name, repositoryRoot) {
     }
     // First check if this is a local .js file
     const localPath = (0,external_path_.resolve)(repositoryRoot, name);
-    const importPath = (await (0,lib.pathExists)(localPath))
-        ? localPath
-        : name;
-    try {
-        // Sad workaround for testing since dynamic import segfaults
-        if (process.env.JEST_WORKER_ID !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            return __nccwpck_require__(5086)(importPath).default;
-        }
-        else {
-            return (await __nccwpck_require__(2752)(importPath)).default;
-        }
-    }
-    catch (err) {
-        throw err;
-    }
+    const importPath = (await (0,lib.pathExists)(localPath)) ? localPath : name;
+    return (await __nccwpck_require__(2752)(importPath)).default;
 }
 
 ;// CONCATENATED MODULE: ./src/sync.ts
 
 
 
-
-async function sync_sync(options) {
-    const cwd = options.cwd || process.cwd();
-    const tmpDir = options.tmpDir || (0,external_os_.tmpdir)();
-    const repositoryCloner = options.repositoryCloner;
-    const config = await loadConfig(cwd);
-    const source = new Repository(cwd);
-    for (const repositoryConfig of config.repositories) {
+async function sync_sync(sourceRoot, { repositoryCloner, }) {
+    const sourceConfig = await loadConfig(sourceRoot);
+    const source = new Repository(sourceRoot);
+    let reserved = ["template-sync.plugins.json"];
+    for (const repositoryConfig of sourceConfig.repositories) {
         const template = await repositoryCloner.clone(repositoryConfig.url, repositoryConfig.branch);
-        let reserved = [];
-        for (const pluginConfig of repositoryConfig.plugins) {
+        const pluginsConfig = await loadPluginsConfig(template.root);
+        for (const pluginConfig of pluginsConfig.plugins) {
             const plugin = await loadPlugin(pluginConfig, template.root);
             const { reserved: pluginReserved } = await plugin(template, source, reserved);
             reserved = reserved.concat(...pluginReserved);
@@ -53082,8 +53058,7 @@ async function sync_sync(options) {
 async function main() {
     const tmpDir = process.env["RUNNER_TEMP"] || (0,external_os_.tmpdir)();
     const repositoryCloner = new GitHubRepositoryCloner(core.getInput("token") || null, new GitRepositoryCloner(tmpDir, esm_default().env(process.env)));
-    await sync_sync({
-        tmpDir,
+    await sync_sync(process.cwd(), {
         repositoryCloner,
     });
 }

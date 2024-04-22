@@ -1,3 +1,10 @@
+# [1.0.0-alpha.2](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2024-04-22)
+
+
+### Bug Fixes
+
+* Semantic release ([d5bc33a](https://github.com/tenantcloud/template-sync/commit/d5bc33a85638f43696353caa673a3d949cb9a610))
+
 # 1.0.0-alpha.1 (2024-04-22)
 
 
