@@ -4,6 +4,7 @@ plugins:
     - "@semantic-release/changelog"
     - path: "@semantic-release/npm"
       publish: false
+      verifyConditions: false
     - path: "@semantic-release/exec"
       prepareCmd: "npm run build"
     - "@semantic-release/git"
