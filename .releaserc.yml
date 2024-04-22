@@ -2,7 +2,8 @@ plugins:
     - "@semantic-release/commit-analyzer"
     - "@semantic-release/release-notes-generator"
     - "@semantic-release/changelog"
-    - "@semantic-release/npm"
+    - path: "@semantic-release/npm"
+      publish: false
     - path: "@semantic-release/exec"
       prepareCmd: "npm run build"
     - "@semantic-release/git"
