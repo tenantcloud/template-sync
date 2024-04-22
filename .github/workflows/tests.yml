@@ -54,4 +54,4 @@ jobs:
             - name: Execute prettier
               run: |
                   npx prettier . --check
-                  npm eslint .
+                  npx eslint .
