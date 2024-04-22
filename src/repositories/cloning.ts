@@ -24,7 +24,7 @@ export class GitRepositoryCloner implements RepositoryCloner {
 
 export class GitHubRepositoryCloner implements RepositoryCloner {
 	constructor(
-		private readonly token: string | null = null,
+		private readonly token: string | null,
 		private readonly delegate: RepositoryCloner,
 	) {}
 
