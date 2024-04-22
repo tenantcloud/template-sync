@@ -52925,16 +52925,19 @@ const pluginsConfigSchema = z.strictObject({
         z.string().min(1),
         z.object({
             name: z.string().min(1),
-        }),
+        })
+            .passthrough(),
     ]))
         .min(1),
 });
+const CONFIG_FILE_NAME = "template-sync.json";
 async function loadConfig(root) {
-    const rawConfig = await readJson((0,external_path_.join)(root, "template-sync.json"));
+    const rawConfig = await readJson((0,external_path_.join)(root, CONFIG_FILE_NAME));
     return configSchema.parse(rawConfig);
 }
+const PLUGINS_CONFIG_FILE_NAME = "template-sync.plugins.json";
 async function loadPluginsConfig(root) {
-    const rawConfig = await readJson((0,external_path_.join)(root, "template-sync.plugins.json"));
+    const rawConfig = await readJson((0,external_path_.join)(root, PLUGINS_CONFIG_FILE_NAME));
     return pluginsConfigSchema.parse(rawConfig);
 }
 
@@ -53037,7 +53040,7 @@ async function loadPluginFactory(name, repositoryRoot) {
 async function sync_sync(sourceRoot, { repositoryCloner, }) {
     const sourceConfig = await loadConfig(sourceRoot);
     const source = new Repository(sourceRoot);
-    let reserved = ["template-sync.plugins.json"];
+    let reserved = [PLUGINS_CONFIG_FILE_NAME];
     for (const repositoryConfig of sourceConfig.repositories) {
         const template = await repositoryCloner.clone(repositoryConfig.url, repositoryConfig.branch);
         const pluginsConfig = await loadPluginsConfig(template.root);

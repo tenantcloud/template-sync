@@ -1,3 +1,10 @@
+# [1.0.0-alpha.3](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2024-04-22)
+
+
+### Bug Fixes
+
+* Broken filters ([70c96e7](https://github.com/tenantcloud/template-sync/commit/70c96e7fabb2073faa9eb1d5dc2644b7694b1d09))
+
 # [1.0.0-alpha.2](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2024-04-22)
 
 
