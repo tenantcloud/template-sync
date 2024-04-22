@@ -5,5 +5,5 @@ plugins:
     - path: "@semantic-release/exec"
       prepareCmd: "npm run build"
     - path: "@semantic-release/git"
-      assets: ['CHANGELOG.md', 'dist']
+      assets: ["CHANGELOG.md", "dist"]
     - "@semantic-release/github"
