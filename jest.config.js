@@ -1,11 +1,19 @@
-module.exports = {
+export default {
 	preset: "ts-jest",
 	testEnvironment: "node",
-	roots: ["<rootDir>/src"],
+	roots: ["<rootDir>/src", "<rootDir>/tests"],
 	transform: {
-		"\\.tsx?$": "ts-jest",
-		"\\.jsx?$": "babel-jest",
+		"^.+\\.ts?$": [
+			"ts-jest",
+			{
+				useESM: true,
+			},
+		],
 	},
+	moduleNameMapper: {
+		"^(\\.{1,2}/.*)\\.js$": "$1",
+	},
+	extensionsToTreatAsEsm: ['.ts'],
 	collectCoverage: true,
 	collectCoverageFrom: ["./src/**"],
 	coverageThreshold: {

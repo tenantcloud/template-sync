@@ -1,0 +1,14 @@
+{
+	"name": "package-name",
+	"description": "description",
+	"require": {
+		"r1": "^1.0",
+		"r3": "^1.0"
+	},
+	"require-dev": {},
+	"scripts": {
+		"cs-fix": "php-cs-fixer",
+		"test": "phpunit",
+		"extra": "extra"
+	}
+}

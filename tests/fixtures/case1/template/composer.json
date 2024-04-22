@@ -1,0 +1,13 @@
+{
+	"name": "some-stub-name",
+	"description": "some-stub-description",
+	"require": {
+		"r1": "^2.0",
+		"r2": "^3.0"
+	},
+	"require-dev": {},
+	"scripts": {
+		"cs-fix": "./php-cs-fixer",
+		"test": "./phpunit"
+	}
+}

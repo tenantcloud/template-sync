@@ -165,6 +165,6 @@ allow escape hatches for other styles of comparison in the form of "TemplateDriv
 implementation, all of these `drivers` represent git actions, but for the sake of expandability, may be set up to evaluate
 things like helm chart renderings (at least that is the hope). If you write a driver, please consider contributing it back.
 
-Please see [template-sync](./src/template-sync.ts) for the most up to date options.
+Please see [template-sync](./src/sync.ts) for the most up to date options.
 
 TODO: we should update use case examples

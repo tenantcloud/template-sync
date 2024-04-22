@@ -1,38 +1,38 @@
 {
 	"name": "@tenantcloud/template-sync",
 	"description": "Sync repositories from the template (with unrelated git history)",
-	"scripts": {
-		"format": "prettier . --write",
-		"lint": "eslint .",
-		"test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
-		"build": "ncc build src/github/action/main.ts -o dist"
-	},
 	"license": "MIT",
+	"engines": {
+		"node": ">=20"
+	},
+	"type": "module",
 	"dependencies": {
 		"@actions/core": "^1.10.1",
 		"@actions/github": "^6.0.0",
 		"@vercel/ncc": "^0.38.1",
 		"comment-json": "^4.2.3",
+		"cosmiconfig": "^9.0.0",
 		"diff": "^5.1.0",
 		"fs-extra": "^11.2.0",
+		"globby": "^14.0.1",
 		"jsonpath": "^1.1.1",
 		"lodash.merge": "^4.6.2",
-		"micromatch": "^4.0.5",
-		"octokit": "^3.2.0",
-		"simple-git": "^3.24.0"
+		"remeda": "^1.60.1",
+		"simple-git": "^3.24.0",
+		"zod": "^3.22.5"
 	},
 	"devDependencies": {
 		"@commitlint/config-angular": "^19.0.3",
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/exec": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
-		"@types/diff": "^5.0.9",
 		"@types/fs-extra": "^11.0.4",
 		"@types/jest": "^29.5.11",
 		"@types/jsonpath": "^0.2.4",
 		"@types/lodash.merge": "^4.6.9",
 		"@types/micromatch": "^4.0.6",
 		"@types/node": "^20.11.7",
+		"babel-jest": "^29.7.0",
 		"colors": "^1.4.0",
 		"commander": "^12.0.0",
 		"commitlint": "^19.0.3",
@@ -45,7 +45,9 @@
 		"typescript": "^5.3.3",
 		"typescript-eslint": "^7.1.0"
 	},
-	"engines": {
-		"node": ">=20"
+	"scripts": {
+		"cs-fix": "prettier . --write && eslint .",
+		"test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+		"build": "ncc build src/github-action.ts -o dist/github-action"
 	}
 }
