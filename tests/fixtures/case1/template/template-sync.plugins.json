@@ -3,7 +3,7 @@
 		"composer",
 		{
 			"name": "sync",
-			"filter": ["**/*", "!src/!(templated).ts"]
+			"filter": ["**/*", "!src/**/*"]
 		},
 		{
 			"name": ".github/template-sync/custom-plugin.js"

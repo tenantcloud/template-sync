@@ -1,4 +1,8 @@
-import { loadConfig, loadPluginsConfig } from "./config";
+import {
+	loadConfig,
+	loadPluginsConfig,
+	PLUGINS_CONFIG_FILE_NAME,
+} from "./config";
 import { loadPlugin } from "./plugins/load-plugin";
 import { RepositoryCloner } from "./repositories/cloning";
 import { Repository } from "./repositories/repository";
@@ -13,7 +17,7 @@ export async function sync(
 ): Promise<void> {
 	const sourceConfig = await loadConfig(sourceRoot);
 	const source = new Repository(sourceRoot);
-	let reserved: string[] = ["template-sync.plugins.json"];
+	let reserved: string[] = [PLUGINS_CONFIG_FILE_NAME];
 
 	for (const repositoryConfig of sourceConfig.repositories) {
 		const template = await repositoryCloner.clone(

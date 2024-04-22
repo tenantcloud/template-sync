@@ -18,22 +18,26 @@ const pluginsConfigSchema = z.strictObject({
 		.array(
 			z.union([
 				z.string().min(1),
-				z.object({
-					name: z.string().min(1),
-				}),
+				z
+					.object({
+						name: z.string().min(1),
+					})
+					.passthrough(),
 			]),
 		)
 		.min(1),
 });
 
+export const CONFIG_FILE_NAME = "template-sync.json";
 export async function loadConfig(root: string): Promise<Config> {
-	const rawConfig = await readJson(join(root, "template-sync.json"));
+	const rawConfig = await readJson(join(root, CONFIG_FILE_NAME));
 
 	return configSchema.parse(rawConfig);
 }
 
+export const PLUGINS_CONFIG_FILE_NAME = "template-sync.plugins.json";
 export async function loadPluginsConfig(root: string): Promise<PluginsConfig> {
-	const rawConfig = await readJson(join(root, "template-sync.plugins.json"));
+	const rawConfig = await readJson(join(root, PLUGINS_CONFIG_FILE_NAME));
 
 	return pluginsConfigSchema.parse(rawConfig);
 }
