@@ -7,4 +7,8 @@ module.exports = {
 	parser: "@typescript-eslint/parser",
 	plugins: ["@typescript-eslint"],
 	root: true,
+	rules: {
+		"no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+		"@typescript-eslint/no-explicit-any": "off",
+	},
 };

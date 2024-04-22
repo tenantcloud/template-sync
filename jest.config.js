@@ -13,7 +13,7 @@ export default {
 	moduleNameMapper: {
 		"^(\\.{1,2}/.*)\\.js$": "$1",
 	},
-	extensionsToTreatAsEsm: ['.ts'],
+	extensionsToTreatAsEsm: [".ts"],
 	collectCoverage: true,
 	collectCoverageFrom: ["./src/**"],
 	coverageThreshold: {

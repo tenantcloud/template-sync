@@ -1,6 +1,6 @@
-import { default as syncPlugin } from './sync';
-import { default as composerPlugin } from './composer';
-import {PluginFactory} from "../plugin";
+import { default as syncPlugin } from "./sync";
+import { default as composerPlugin } from "./composer";
+import { PluginFactory } from "../plugin";
 
 export const standardPlugins: { [name: string]: PluginFactory } = {
 	sync: syncPlugin,

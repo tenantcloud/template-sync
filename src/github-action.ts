@@ -1,8 +1,11 @@
 import * as core from "@actions/core";
-import {tmpdir} from "os";
-import {GitHubRepositoryCloner, GitRepositoryCloner} from "./repositories/cloning";
+import { tmpdir } from "os";
+import {
+	GitHubRepositoryCloner,
+	GitRepositoryCloner,
+} from "./repositories/cloning";
 import simpleGit from "simple-git";
-import {sync} from "./sync";
+import { sync } from "./sync";
 
 async function main() {
 	const tmpDir = process.env["RUNNER_TEMP"] || tmpdir();
@@ -12,7 +15,6 @@ async function main() {
 	);
 
 	await sync({
-		tmpDir,
 		repositoryCloner,
 	});
 }
