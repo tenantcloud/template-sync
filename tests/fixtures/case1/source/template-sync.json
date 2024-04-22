@@ -8,6 +8,9 @@
 				{
 					"name": "sync",
 					"filter": ["**/*", "!src/!(templated).ts"]
+				},
+				{
+					"name": ".github/template-sync/custom-plugin.js"
 				}
 			]
 		}

@@ -36,8 +36,7 @@ describe("syncs from template", () => {
 
 		await cp(join(caseRoot, "source"), copyRoot, { recursive: true });
 
-		await sync({
-			cwd: copyRoot,
+		await sync(copyRoot, {
 			repositoryCloner: new FixtureRepositoryCloner(caseRoot),
 		});
 

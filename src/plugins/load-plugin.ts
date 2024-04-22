@@ -35,20 +35,9 @@ async function loadPluginFactory(
 	const localPath = resolve(repositoryRoot, name);
 	const importPath = (await pathExists(localPath)) ? localPath : name;
 
-	// Sad workaround for testing since dynamic import segfaults
-	if (process.env.JEST_WORKER_ID !== undefined) {
-		/* eslint-disable @typescript-eslint/no-var-requires */
-		return (
-			require(importPath) as unknown as {
-				default: PluginFactory;
-			}
-		).default;
-		/* eslint-enable @typescript-eslint/no-var-requires */
-	} else {
-		return (
-			(await import(importPath)) as unknown as {
-				default: PluginFactory;
-			}
-		).default;
-	}
+	return (
+		(await import(importPath)) as unknown as {
+			default: PluginFactory;
+		}
+	).default;
 }

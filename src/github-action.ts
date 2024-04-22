@@ -14,7 +14,7 @@ async function main() {
 		new GitRepositoryCloner(tmpDir, simpleGit().env(process.env)),
 	);
 
-	await sync({
+	await sync(process.cwd(), {
 		repositoryCloner,
 	});
 }

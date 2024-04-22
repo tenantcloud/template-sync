@@ -3,15 +3,16 @@ import { loadPlugin } from "./plugins/load-plugin";
 import { RepositoryCloner } from "./repositories/cloning";
 import { Repository } from "./repositories/repository";
 
-export async function sync(options: {
-	cwd?: string;
-	repositoryCloner: RepositoryCloner;
-}): Promise<void> {
-	const cwd = options.cwd || process.cwd();
+export async function sync(
+	sourceRoot: string,
+	options: {
+		repositoryCloner: RepositoryCloner;
+	},
+): Promise<void> {
 	const repositoryCloner = options.repositoryCloner;
-	const config = await loadConfig(cwd);
+	const config = await loadConfig(sourceRoot);
 
-	const source = new Repository(cwd);
+	const source = new Repository(sourceRoot);
 
 	for (const repositoryConfig of config.repositories) {
 		const template = await repositoryCloner.clone(
