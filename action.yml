@@ -9,6 +9,10 @@ inputs:
         description: A GitHub token with permissions to clone from other repositories. Only necessary for private templates
         required: false
 
+outputs:
+    report:
+        description: A short report of what has happened, aside from the file changes, in Markdown format
+
 runs:
     using: "node20"
     main: "dist/github-action/index.js"

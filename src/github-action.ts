@@ -6,6 +6,7 @@ import {
 } from "./repositories/cloning";
 import simpleGit from "simple-git";
 import { sync } from "./sync";
+import { syncResultToReport } from "./results/result-to-report";
 
 async function main() {
 	const tmpDir = process.env["RUNNER_TEMP"] || tmpdir();
@@ -14,9 +15,11 @@ async function main() {
 		new GitRepositoryCloner(tmpDir, simpleGit().env(process.env)),
 	);
 
-	await sync(process.cwd(), {
+	const result = await sync(process.cwd(), {
 		repositoryCloner,
 	});
+
+	core.setOutput("report", syncResultToReport(result));
 }
 
 void main();

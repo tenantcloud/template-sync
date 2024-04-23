@@ -2,10 +2,15 @@ import {
 	loadSourceConfig,
 	loadTemplateConfig,
 	POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES,
+	SourceConfig,
 } from "./config";
 import { loadPlugin } from "./plugins/load-plugin";
 import { RepositoryCloner } from "./repositories/cloning";
 import { Repository } from "./repositories/repository";
+
+export interface SyncResult {
+	repositories: SourceConfig["repositories"];
+}
 
 export async function sync(
 	sourceRoot: string,
@@ -14,7 +19,7 @@ export async function sync(
 	}: {
 		repositoryCloner: RepositoryCloner;
 	},
-): Promise<void> {
+): Promise<SyncResult> {
 	const sourceConfig = await loadSourceConfig(sourceRoot);
 	const source = new Repository(sourceRoot);
 	let reserved: string[] = [...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES];
@@ -47,4 +52,8 @@ export async function sync(
 			reserved = reserved.concat(...pluginReserved);
 		}
 	}
+
+	return {
+		repositories: sourceConfig.repositories,
+	};
 }

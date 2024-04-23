@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`syncResultToReport converts result to markdown string 1`] = `
+"## The following repositories were used for sync:
+
+- <https://github.com/first/repo> at branch \`alpha\`
+- <https://github.com/second/repo> at branch \`master\`"
+`;

@@ -17,7 +17,7 @@ export default {
 	extensionsToTreatAsEsm: [".ts"],
 	collectCoverage: true,
 	collectCoverageFrom: ["./src/**"],
-	coveragePathIgnorePatterns: ["src/github-action.ts"],
+	coveragePathIgnorePatterns: ["src/github-action.ts", ".*__snapshots__/.*"],
 	coverageThreshold: {
 		global: {
 			branches: 40,
