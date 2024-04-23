@@ -73,7 +73,7 @@ async function loadConfigFromPossible(
 		return await readJson(path);
 	}
 
-	throw new Error("Could not find config");
+	throw new Error("Could not find config.");
 }
 
 export type SourceConfig = z.infer<typeof sourceConfigSchema>;
