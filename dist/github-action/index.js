@@ -43388,6 +43388,8 @@ var external_os_ = __nccwpck_require__(2037);
 var external_path_ = __nccwpck_require__(1017);
 ;// CONCATENATED MODULE: external "node:crypto"
 const external_node_crypto_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:crypto");
+// EXTERNAL MODULE: ./node_modules/remeda/dist/commonjs/index.js
+var commonjs = __nccwpck_require__(8886);
 ;// CONCATENATED MODULE: external "node:process"
 const external_node_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:process");
 ;// CONCATENATED MODULE: external "node:fs"
@@ -44071,10 +44073,14 @@ const generateGlobTasksSync = normalizeArgumentsSync(generateTasksSync);
 
 const {convertPathToPattern} = out;
 
-// EXTERNAL MODULE: ./node_modules/remeda/dist/commonjs/index.js
-var commonjs = __nccwpck_require__(8886);
-;// CONCATENATED MODULE: ./src/repositories/repository.ts
+;// CONCATENATED MODULE: ./src/glob.ts
 
+
+async function glob(patterns, root, ignore = []) {
+    return commonjs.difference.multiset(await globby(patterns, { cwd: root, dot: true }), ignore);
+}
+
+;// CONCATENATED MODULE: ./src/repositories/repository.ts
 
 
 class Repository {
@@ -44086,7 +44092,7 @@ class Repository {
         return (0,external_path_.join)(this.root, relative);
     }
     async files(patterns = ["**/*"], ignore = []) {
-        return commonjs.difference.multiset(await globby(patterns, { cwd: this.root }), ignore);
+        return await glob(patterns, this.root, ignore);
     }
 }
 
@@ -52975,6 +52981,8 @@ async function loadConfigFromPossible(root, possibleFileNames) {
 
 
 
+
+
 const optionsSchema = z.strictObject({
     filter: z.array(z.string()).default(["**/*"]),
     deleteExtra: z.boolean().default(true),
@@ -52984,6 +52992,7 @@ const optionsSchema = z.strictObject({
     return async function (template, source, reserved) {
         const templateFiles = await template.files(options.filter, reserved);
         for (const file of templateFiles) {
+            await (0,lib.ensureDir)((0,external_path_.dirname)(source.path(file)));
             await (0,external_fs_promises_namespaceObject.copyFile)(template.path(file), source.path(file));
         }
         if (options.deleteExtra) {

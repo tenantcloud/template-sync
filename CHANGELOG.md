@@ -1,3 +1,10 @@
+# [1.0.0-alpha.6](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2024-04-23)
+
+
+### Bug Fixes
+
+* Glob ignores dot directories/files ([4d9beb2](https://github.com/tenantcloud/template-sync/commit/4d9beb2556f2aafb698e29d3722c9994ae025907))
+
 # [1.0.0-alpha.5](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2024-04-23)
 
 
