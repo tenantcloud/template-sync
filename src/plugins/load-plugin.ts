@@ -8,13 +8,11 @@ export async function loadPlugin(
 	pluginConfig: PluginConfig,
 	repositoryRoot: string,
 ): Promise<Plugin> {
-	if (typeof pluginConfig === "string") {
-		pluginConfig = {
-			name: pluginConfig,
-		};
-	}
-
 	const { name, ...config } = pluginConfig;
+
+	console.debug(
+		`Loading plugin ${name} with configuration ${JSON.stringify(config)}`,
+	);
 
 	const pluginFactory = await loadPluginFactory(name, repositoryRoot);
 

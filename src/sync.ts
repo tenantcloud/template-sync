@@ -20,15 +20,23 @@ export async function sync(
 	let reserved: string[] = [...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES];
 
 	for (const repositoryConfig of sourceConfig.repositories) {
+		console.debug(
+			`Cloning template repository from ${repositoryConfig.url} at branch ${repositoryConfig.branch}`,
+		);
+
 		const template = await repositoryCloner.clone(
 			repositoryConfig.url,
 			repositoryConfig.branch,
 		);
 
+		console.debug("Loading template config");
+
 		const templateConfig = await loadTemplateConfig(template.root);
 
 		for (const pluginConfig of templateConfig.plugins) {
 			const plugin = await loadPlugin(pluginConfig, template.root);
+
+			console.debug(`Executing plugin ${pluginConfig.name}`);
 
 			const { reserved: pluginReserved } = await plugin(
 				template,

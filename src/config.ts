@@ -17,14 +17,24 @@ const sourceConfigSchema = z.strictObject({
 const templateConfigSchema = z.strictObject({
 	plugins: z
 		.array(
-			z.union([
-				z.string().min(1),
-				z
-					.object({
-						name: z.string().min(1),
-					})
-					.passthrough(),
-			]),
+			z
+				.union([
+					z.string().min(1),
+					z
+						.object({
+							name: z.string().min(1),
+						})
+						.passthrough(),
+				])
+				.transform((value) => {
+					if (typeof value === "string") {
+						value = {
+							name: value,
+						};
+					}
+
+					return value;
+				}),
 		)
 		.min(1),
 });
@@ -70,10 +80,14 @@ async function loadConfigFromPossible(
 			continue;
 		}
 
+		console.debug("Found config at " + fileName);
+
 		return await readJson(path);
 	}
 
-	throw new Error("Could not find config.");
+	throw new Error(
+		"Could not find config in these paths: " + possibleFileNames.join(", "),
+	);
 }
 
 export type SourceConfig = z.infer<typeof sourceConfigSchema>;
