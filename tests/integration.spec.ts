@@ -4,10 +4,10 @@ import { join, resolve, dirname } from "path";
 import { RepositoryCloner } from "../src/repositories/cloning";
 import { sync } from "../src/sync";
 import { tmpdir } from "os";
-import { globby } from "globby";
 import { fileURLToPath } from "node:url";
 import { cp } from "node:fs/promises";
 import { Repository } from "../src/repositories/repository";
+import { glob } from "../src/glob";
 
 class FixtureRepositoryCloner implements RepositoryCloner {
 	constructor(private readonly root: string) {}
@@ -40,9 +40,9 @@ describe("syncs from template", () => {
 			repositoryCloner: new FixtureRepositoryCloner(caseRoot),
 		});
 
-		const expectedFiles = await globby("**/*", { cwd: expectedRoot });
+		const expectedFiles = await glob("**/*", expectedRoot);
 
-		expect(await globby("**/*", { cwd: copyRoot })).toEqual(expectedFiles);
+		expect(await glob("**/*", copyRoot)).toEqual(expectedFiles);
 
 		for (const file of expectedFiles) {
 			const copyFilePath = join(copyRoot, file);

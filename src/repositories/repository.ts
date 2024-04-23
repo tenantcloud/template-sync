@@ -1,6 +1,5 @@
-import { globby } from "globby";
 import { join } from "path";
-import * as R from "remeda";
+import { glob } from "../glob";
 
 export class Repository {
 	constructor(public readonly root: string) {}
@@ -13,9 +12,6 @@ export class Repository {
 		patterns: string[] = ["**/*"],
 		ignore: string[] = [],
 	): Promise<string[]> {
-		return R.difference.multiset(
-			await globby(patterns, { cwd: this.root }),
-			ignore,
-		);
+		return await glob(patterns, this.root, ignore);
 	}
 }

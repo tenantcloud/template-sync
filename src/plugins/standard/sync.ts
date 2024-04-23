@@ -2,6 +2,8 @@ import { z } from "zod";
 import { PluginFactory } from "../plugin";
 import { copyFile, unlink } from "fs/promises";
 import * as R from "remeda";
+import { ensureDir } from "fs-extra";
+import { dirname } from "path";
 
 const optionsSchema = z.strictObject({
 	filter: z.array(z.string()).default(["**/*"]),
@@ -15,6 +17,7 @@ export default ((rawOptions) => {
 		const templateFiles = await template.files(options.filter, reserved);
 
 		for (const file of templateFiles) {
+			await ensureDir(dirname(source.path(file)));
 			await copyFile(template.path(file), source.path(file));
 		}
 
