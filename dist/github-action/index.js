@@ -52930,7 +52930,15 @@ const templateConfigSchema = z.strictObject({
             name: z.string().min(1),
         })
             .passthrough(),
-    ]))
+    ])
+        .transform((value) => {
+        if (typeof value === "string") {
+            value = {
+                name: value,
+            };
+        }
+        return value;
+    }))
         .min(1),
 });
 const SOURCE_CONFIG_FILE_NAME = "template-sync.json";
@@ -52957,9 +52965,10 @@ async function loadConfigFromPossible(root, possibleFileNames) {
         if (!(await (0,lib.pathExists)(path))) {
             continue;
         }
+        console.debug("Found config at " + fileName);
         return await readJson(path);
     }
-    throw new Error("Could not find config.");
+    throw new Error("Could not find config in these paths: " + possibleFileNames.join(", "));
 }
 
 ;// CONCATENATED MODULE: ./src/plugins/standard/sync.ts
@@ -53032,12 +53041,8 @@ const standardPlugins = {
 
 
 async function loadPlugin(pluginConfig, repositoryRoot) {
-    if (typeof pluginConfig === "string") {
-        pluginConfig = {
-            name: pluginConfig,
-        };
-    }
     const { name, ...config } = pluginConfig;
+    console.debug(`Loading plugin ${name} with configuration ${JSON.stringify(config)}`);
     const pluginFactory = await loadPluginFactory(name, repositoryRoot);
     return pluginFactory(config);
 }
@@ -53061,14 +53066,28 @@ async function sync_sync(sourceRoot, { repositoryCloner, }) {
     const source = new Repository(sourceRoot);
     let reserved = [...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES];
     for (const repositoryConfig of sourceConfig.repositories) {
+        console.debug(`Cloning template repository from ${repositoryConfig.url} at branch ${repositoryConfig.branch}`);
         const template = await repositoryCloner.clone(repositoryConfig.url, repositoryConfig.branch);
+        console.debug("Loading template config");
         const templateConfig = await loadTemplateConfig(template.root);
         for (const pluginConfig of templateConfig.plugins) {
             const plugin = await loadPlugin(pluginConfig, template.root);
+            console.debug(`Executing plugin ${pluginConfig.name}`);
             const { reserved: pluginReserved } = await plugin(template, source, reserved);
             reserved = reserved.concat(...pluginReserved);
         }
     }
+    return {
+        repositories: sourceConfig.repositories,
+    };
+}
+
+;// CONCATENATED MODULE: ./src/results/result-to-report.ts
+function syncResultToReport(result) {
+    const repositories = result.repositories.map(({ url, branch }) => `- <${url}> at branch \`${branch}\``);
+    return `## The following repositories were used for sync:
+
+${repositories.join("\n")}`;
 }
 
 ;// CONCATENATED MODULE: ./src/github-action.ts
@@ -53077,12 +53096,14 @@ async function sync_sync(sourceRoot, { repositoryCloner, }) {
 
 
 
+
 async function main() {
     const tmpDir = process.env["RUNNER_TEMP"] || (0,external_os_.tmpdir)();
     const repositoryCloner = new GitHubRepositoryCloner(core.getInput("token") || null, new GitRepositoryCloner(tmpDir, esm_default().env(process.env)));
-    await sync_sync(process.cwd(), {
+    const result = await sync_sync(process.cwd(), {
         repositoryCloner,
     });
+    core.setOutput("report", syncResultToReport(result));
 }
 void main();
 
