@@ -44077,7 +44077,10 @@ const {convertPathToPattern} = out;
 
 
 async function glob(patterns, root, ignore = []) {
-    return commonjs.difference.multiset(await globby(patterns, { cwd: root, dot: true }), ignore);
+    if (typeof patterns === "string") {
+        patterns = [patterns];
+    }
+    return commonjs.difference.multiset(await globby([...patterns, "!.git/**/*"], { cwd: root, dot: true }), ignore);
 }
 
 ;// CONCATENATED MODULE: ./src/repositories/repository.ts

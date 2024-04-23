@@ -1,3 +1,10 @@
+# [1.0.0-alpha.8](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.7...v1.0.0-alpha.8) (2024-04-23)
+
+
+### Bug Fixes
+
+* Ignore .git directory ([7536307](https://github.com/tenantcloud/template-sync/commit/75363078efaaaf834a938ff4d9514f812a5e21c1))
+
 # [1.0.0-alpha.7](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2024-04-23)
 
 
