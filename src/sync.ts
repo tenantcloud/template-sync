@@ -1,7 +1,7 @@
 import {
-	loadConfig,
-	loadPluginsConfig,
-	PLUGINS_CONFIG_FILE_NAME,
+	loadSourceConfig,
+	loadTemplateConfig,
+	POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES,
 } from "./config";
 import { loadPlugin } from "./plugins/load-plugin";
 import { RepositoryCloner } from "./repositories/cloning";
@@ -15,9 +15,9 @@ export async function sync(
 		repositoryCloner: RepositoryCloner;
 	},
 ): Promise<void> {
-	const sourceConfig = await loadConfig(sourceRoot);
+	const sourceConfig = await loadSourceConfig(sourceRoot);
 	const source = new Repository(sourceRoot);
-	let reserved: string[] = [PLUGINS_CONFIG_FILE_NAME];
+	let reserved: string[] = [...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES];
 
 	for (const repositoryConfig of sourceConfig.repositories) {
 		const template = await repositoryCloner.clone(
@@ -25,9 +25,9 @@ export async function sync(
 			repositoryConfig.branch,
 		);
 
-		const pluginsConfig = await loadPluginsConfig(template.root);
+		const templateConfig = await loadTemplateConfig(template.root);
 
-		for (const pluginConfig of pluginsConfig.plugins) {
+		for (const pluginConfig of templateConfig.plugins) {
 			const plugin = await loadPlugin(pluginConfig, template.root);
 
 			const { reserved: pluginReserved } = await plugin(
