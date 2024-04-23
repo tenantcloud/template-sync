@@ -1,3 +1,10 @@
+# [1.0.0-alpha.7](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2024-04-23)
+
+
+### Features
+
+* Add more debug logging ([0e7f297](https://github.com/tenantcloud/template-sync/commit/0e7f29700f42925c54e5356313fa18a24ca769e2))
+
 # [1.0.0-alpha.6](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2024-04-23)
 
 

@@ -52991,13 +52991,17 @@ const optionsSchema = z.strictObject({
     const options = optionsSchema.parse(rawOptions);
     return async function (template, source, reserved) {
         const templateFiles = await template.files(options.filter, reserved);
+        console.debug(`Files from the template: ${templateFiles.join(", ")}`);
         for (const file of templateFiles) {
             await (0,lib.ensureDir)((0,external_path_.dirname)(source.path(file)));
             await (0,external_fs_promises_namespaceObject.copyFile)(template.path(file), source.path(file));
         }
         if (options.deleteExtra) {
             const sourceFiles = await source.files(options.filter, reserved);
-            for (const file of commonjs.difference.multiset(sourceFiles, templateFiles)) {
+            console.debug(`Files from the source: ${sourceFiles.join(", ")}`);
+            const extraFiles = commonjs.difference.multiset(sourceFiles, templateFiles);
+            console.debug(`Deleting extra non-matching files: ${extraFiles.join(", ")}`);
+            for (const file of extraFiles) {
                 await (0,external_fs_promises_namespaceObject.unlink)(source.path(file));
             }
         }
