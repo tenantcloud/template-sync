@@ -52909,18 +52909,21 @@ async function writeJson(path, obj) {
     await (0,external_fs_promises_namespaceObject.writeFile)(path, JSON.stringify(obj));
 }
 
+// EXTERNAL MODULE: ./node_modules/fs-extra/lib/index.js
+var lib = __nccwpck_require__(5630);
 ;// CONCATENATED MODULE: ./src/config.ts
 
 
 
-const configSchema = z.strictObject({
+
+const sourceConfigSchema = z.strictObject({
     repositories: z.array(z.strictObject({
         url: z.string().min(1),
         branch: z.string().min(1),
     }))
         .min(1),
 });
-const pluginsConfigSchema = z.strictObject({
+const templateConfigSchema = z.strictObject({
     plugins: z.array(z.union([
         z.string().min(1),
         z.object({
@@ -52930,19 +52933,35 @@ const pluginsConfigSchema = z.strictObject({
     ]))
         .min(1),
 });
-const CONFIG_FILE_NAME = "template-sync.json";
-async function loadConfig(root) {
-    const rawConfig = await readJson((0,external_path_.join)(root, CONFIG_FILE_NAME));
-    return configSchema.parse(rawConfig);
+const SOURCE_CONFIG_FILE_NAME = "template-sync.json";
+const POSSIBLE_SOURCE_CONFIG_FILE_NAMES = [
+    SOURCE_CONFIG_FILE_NAME,
+    ".github/" + SOURCE_CONFIG_FILE_NAME,
+];
+async function loadSourceConfig(root) {
+    const rawConfig = await loadConfigFromPossible(root, POSSIBLE_SOURCE_CONFIG_FILE_NAMES);
+    return sourceConfigSchema.parse(rawConfig);
 }
-const PLUGINS_CONFIG_FILE_NAME = "template-sync.plugins.json";
-async function loadPluginsConfig(root) {
-    const rawConfig = await readJson((0,external_path_.join)(root, PLUGINS_CONFIG_FILE_NAME));
-    return pluginsConfigSchema.parse(rawConfig);
+const TEMPLATE_CONFIG_FILE_NAME = "template-sync.template.json";
+const POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES = [
+    TEMPLATE_CONFIG_FILE_NAME,
+    ".github/" + TEMPLATE_CONFIG_FILE_NAME,
+];
+async function loadTemplateConfig(root) {
+    const rawConfig = await loadConfigFromPossible(root, POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES);
+    return templateConfigSchema.parse(rawConfig);
+}
+async function loadConfigFromPossible(root, possibleFileNames) {
+    for (const fileName of possibleFileNames) {
+        const path = (0,external_path_.join)(root, fileName);
+        if (!(await (0,lib.pathExists)(path))) {
+            continue;
+        }
+        return await readJson(path);
+    }
+    throw new Error("Could not find config.");
 }
 
-// EXTERNAL MODULE: ./node_modules/fs-extra/lib/index.js
-var lib = __nccwpck_require__(5630);
 ;// CONCATENATED MODULE: ./src/plugins/standard/sync.ts
 
 
@@ -53038,13 +53057,13 @@ async function loadPluginFactory(name, repositoryRoot) {
 
 
 async function sync_sync(sourceRoot, { repositoryCloner, }) {
-    const sourceConfig = await loadConfig(sourceRoot);
+    const sourceConfig = await loadSourceConfig(sourceRoot);
     const source = new Repository(sourceRoot);
-    let reserved = [PLUGINS_CONFIG_FILE_NAME];
+    let reserved = [...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES];
     for (const repositoryConfig of sourceConfig.repositories) {
         const template = await repositoryCloner.clone(repositoryConfig.url, repositoryConfig.branch);
-        const pluginsConfig = await loadPluginsConfig(template.root);
-        for (const pluginConfig of pluginsConfig.plugins) {
+        const templateConfig = await loadTemplateConfig(template.root);
+        for (const pluginConfig of templateConfig.plugins) {
             const plugin = await loadPlugin(pluginConfig, template.root);
             const { reserved: pluginReserved } = await plugin(template, source, reserved);
             reserved = reserved.concat(...pluginReserved);

@@ -1,3 +1,10 @@
+# [1.0.0-alpha.4](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2024-04-23)
+
+
+### Bug Fixes
+
+* Error message ([605e3ee](https://github.com/tenantcloud/template-sync/commit/605e3eea3c36e8643e836103bee4abdfff677c2e))
+
 # [1.0.0-alpha.3](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2024-04-22)
 
 
