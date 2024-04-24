@@ -1,45 +1,71 @@
-import {
-	loadSourceConfig,
-	loadTemplateConfig,
-	POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES,
-	SourceConfig,
-} from "./config";
+import { loadSourceConfig, loadTemplateConfig, PluginConfig } from "./config";
 import { loadPlugin } from "./plugins/load-plugin";
-import { RepositoryCloner } from "./repositories/cloning";
+import { RepositorySourcer } from "./repositories/sourcing";
 import { Repository } from "./repositories/repository";
 
 export interface SyncResult {
-	repositories: SourceConfig["repositories"];
+	repositories: {
+		url: string;
+		branch: string;
+	}[];
 }
 
-export async function sync(
-	sourceRoot: string,
-	{
-		repositoryCloner,
-	}: {
-		repositoryCloner: RepositoryCloner;
-	},
-): Promise<SyncResult> {
-	const sourceConfig = await loadSourceConfig(sourceRoot);
-	const source = new Repository(sourceRoot);
-	let reserved: string[] = [...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES];
+export class Syncer {
+	constructor(private readonly repositorySourcer: RepositorySourcer) {}
 
-	for (const repositoryConfig of sourceConfig.repositories) {
-		console.debug(
-			`Cloning template repository from ${repositoryConfig.url} at branch ${repositoryConfig.branch}`,
+	async sync(sourceRoot: string): Promise<SyncResult> {
+		const source = new Repository(sourceRoot);
+		const sourceConfig = await loadSourceConfig(
+			source.path(await source.sourceConfigFileName()),
 		);
 
-		const template = await repositoryCloner.clone(
-			repositoryConfig.url,
-			repositoryConfig.branch,
-		);
+		for (const repositoryConfig of sourceConfig.repositories) {
+			console.debug(
+				`Cloning template repository from ${repositoryConfig.url} at branch ${repositoryConfig.branch}`,
+			);
+			const templateRoot = await this.repositorySourcer.source(
+				repositoryConfig.url,
+				repositoryConfig.branch,
+			);
 
-		console.debug("Loading template config");
+			console.debug("Loading template config");
+			const template = new Repository(templateRoot);
+			const templateConfig = await loadTemplateConfig(
+				template.path(await template.templateConfigFileName()),
+			);
 
-		const templateConfig = await loadTemplateConfig(template.root);
+			console.debug("Running template plugins");
+			await this.runPlugins(
+				template,
+				source,
+				template.root,
+				templateConfig.plugins,
+			);
 
-		for (const pluginConfig of templateConfig.plugins) {
-			const plugin = await loadPlugin(pluginConfig, template.root);
+			console.debug("Running source plugins");
+			await this.runPlugins(
+				template,
+				source,
+				source.root,
+				repositoryConfig.after.plugins,
+			);
+		}
+
+		return {
+			repositories: sourceConfig.repositories,
+		};
+	}
+
+	private async runPlugins(
+		template: Repository,
+		source: Repository,
+		root: string,
+		pluginConfigs: PluginConfig[],
+	) {
+		let reserved: string[] = [];
+
+		for (const pluginConfig of pluginConfigs) {
+			const plugin = await loadPlugin(pluginConfig, root);
 
 			console.debug(`Executing plugin ${pluginConfig.name}`);
 
@@ -52,8 +78,4 @@ export async function sync(
 			reserved = reserved.concat(...pluginReserved);
 		}
 	}
-
-	return {
-		repositories: sourceConfig.repositories,
-	};
 }

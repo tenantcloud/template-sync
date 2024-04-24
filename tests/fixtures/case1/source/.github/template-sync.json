@@ -2,7 +2,17 @@
 	"repositories": [
 		{
 			"url": "template",
-			"branch": "master"
+			"branch": "master",
+
+			"after": {
+				"plugins": [
+					".github/template-sync/override.js"
+				]
+			}
+		},
+		{
+			"url": "other-template",
+			"branch": "alpha"
 		}
 	]
 }

@@ -1,0 +1,8 @@
+{
+	"plugins": [
+		{
+			"name": "sync",
+			"deleteExtra": false
+		}
+	]
+}

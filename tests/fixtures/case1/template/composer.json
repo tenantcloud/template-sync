@@ -5,7 +5,9 @@
 		"r1": "^2.0",
 		"r2": "^3.0"
 	},
-	"require-dev": {},
+	"require-dev": {
+		"to-override": "^1.0"
+	},
 	"scripts": {
 		"cs-fix": "./php-cs-fixer",
 		"test": "./phpunit"

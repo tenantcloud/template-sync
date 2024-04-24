@@ -2,6 +2,10 @@
 	"repositories": [
 		{
 			"url": "template",
+			"branch": "changed-branch"
+		},
+		{
+			"url": "added-template",
 			"branch": "master"
 		}
 	]

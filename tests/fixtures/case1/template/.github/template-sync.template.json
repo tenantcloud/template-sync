@@ -1,6 +1,7 @@
 {
 	"plugins": [
 		"composer",
+		"template-sync",
 		{
 			"name": "sync",
 			"filter": ["**/*", "!src/**/*", "!.github/template-sync/**/*"]

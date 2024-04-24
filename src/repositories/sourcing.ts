@@ -1,34 +1,33 @@
 import { SimpleGit } from "simple-git";
 import { resolve } from "path";
 import { randomUUID } from "node:crypto";
-import { Repository } from "./repository";
 
-export interface RepositoryCloner {
-	clone(url: string, branch: string): Promise<Repository>;
+export interface RepositorySourcer {
+	source(url: string, branch: string): Promise<string>;
 }
 
-export class GitRepositoryCloner implements RepositoryCloner {
+export class GitRepositorySourcer implements RepositorySourcer {
 	constructor(
 		private readonly tmpDir: string,
 		private readonly git: SimpleGit,
 	) {}
 
-	async clone(url: string, branch: string): Promise<Repository> {
+	async source(url: string, branch: string): Promise<string> {
 		const destination = resolve(this.tmpDir, randomUUID());
 
 		await this.git.clone(url, destination, ["--branch", branch]);
 
-		return new Repository(destination);
+		return destination;
 	}
 }
 
-export class GitHubRepositoryCloner implements RepositoryCloner {
+export class GitHubRepositorySourcer implements RepositorySourcer {
 	constructor(
 		private readonly token: string | null,
-		private readonly delegate: RepositoryCloner,
+		private readonly delegate: RepositorySourcer,
 	) {}
 
-	async clone(url: string, branch: string): Promise<Repository> {
+	async source(url: string, branch: string): Promise<string> {
 		if (this.token && url.includes("https://github.com")) {
 			const authToken = `github_actions:${this.token}@`;
 
@@ -38,6 +37,6 @@ export class GitHubRepositoryCloner implements RepositoryCloner {
 			);
 		}
 
-		return await this.delegate.clone(url, branch);
+		return await this.delegate.source(url, branch);
 	}
 }

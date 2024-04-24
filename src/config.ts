@@ -1,7 +1,26 @@
 import { z } from "zod";
-import { join } from "path";
 import { readJson } from "./utils";
-import { pathExists } from "fs-extra";
+
+const pluginsSchema = z.array(
+	z
+		.union([
+			z.string().min(1),
+			z
+				.object({
+					name: z.string().min(1),
+				})
+				.passthrough(),
+		])
+		.transform((value) => {
+			if (typeof value === "string") {
+				value = {
+					name: value,
+				};
+			}
+
+			return value;
+		}),
+);
 
 const sourceConfigSchema = z.strictObject({
 	repositories: z
@@ -9,85 +28,35 @@ const sourceConfigSchema = z.strictObject({
 			z.strictObject({
 				url: z.string().min(1),
 				branch: z.string().min(1),
+
+				after: z
+					.strictObject({
+						plugins: pluginsSchema,
+					})
+					.default({
+						plugins: [],
+					}),
 			}),
 		)
 		.min(1),
 });
 
 const templateConfigSchema = z.strictObject({
-	plugins: z
-		.array(
-			z
-				.union([
-					z.string().min(1),
-					z
-						.object({
-							name: z.string().min(1),
-						})
-						.passthrough(),
-				])
-				.transform((value) => {
-					if (typeof value === "string") {
-						value = {
-							name: value,
-						};
-					}
-
-					return value;
-				}),
-		)
-		.min(1),
+	plugins: pluginsSchema.min(1),
 });
 
-const SOURCE_CONFIG_FILE_NAME = "template-sync.json";
-const POSSIBLE_SOURCE_CONFIG_FILE_NAMES = [
-	SOURCE_CONFIG_FILE_NAME,
-	".github/" + SOURCE_CONFIG_FILE_NAME,
-];
-export async function loadSourceConfig(root: string): Promise<SourceConfig> {
-	const rawConfig = await loadConfigFromPossible(
-		root,
-		POSSIBLE_SOURCE_CONFIG_FILE_NAMES,
-	);
+export async function loadSourceConfig(path: string): Promise<SourceConfig> {
+	console.debug(`Loading source config from ${path}`);
 
-	return sourceConfigSchema.parse(rawConfig);
+	return sourceConfigSchema.parse(await readJson(path));
 }
 
-const TEMPLATE_CONFIG_FILE_NAME = "template-sync.template.json";
-export const POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES = [
-	TEMPLATE_CONFIG_FILE_NAME,
-	".github/" + TEMPLATE_CONFIG_FILE_NAME,
-];
 export async function loadTemplateConfig(
-	root: string,
+	path: string,
 ): Promise<TemplateConfig> {
-	const rawConfig = await loadConfigFromPossible(
-		root,
-		POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES,
-	);
+	console.debug(`Loading template config from ${path}`);
 
-	return templateConfigSchema.parse(rawConfig);
-}
-
-async function loadConfigFromPossible(
-	root: string,
-	possibleFileNames: string[],
-): Promise<any> {
-	for (const fileName of possibleFileNames) {
-		const path = join(root, fileName);
-
-		if (!(await pathExists(path))) {
-			continue;
-		}
-
-		console.debug("Found config at " + fileName);
-
-		return await readJson(path);
-	}
-
-	throw new Error(
-		"Could not find config in these paths: " + possibleFileNames.join(", "),
-	);
+	return templateConfigSchema.parse(await readJson(path));
 }
 
 export type SourceConfig = z.infer<typeof sourceConfigSchema>;

@@ -1,9 +1,8 @@
 import {
-	GitHubRepositoryCloner,
-	GitRepositoryCloner,
-	RepositoryCloner,
-} from "./cloning";
-import { Repository } from "./repository";
+	GitHubRepositorySourcer,
+	GitRepositorySourcer,
+	RepositorySourcer,
+} from "./sourcing";
 import { jest } from "@jest/globals";
 import { tmpdir } from "os";
 import { SimpleGit } from "simple-git";
@@ -13,9 +12,9 @@ describe("git repository cloner", () => {
 		const tmpDir = tmpdir();
 		const cloneFunc = jest.fn<SimpleGit["clone"]>().mockResolvedValue("");
 
-		const repository = await new GitRepositoryCloner(tmpDir, {
+		const root = await new GitRepositorySourcer(tmpDir, {
 			clone: cloneFunc,
-		} as unknown as SimpleGit).clone(
+		} as unknown as SimpleGit).source(
 			"https://github.com/tenantcloud/template-sync",
 			"alpha",
 		);
@@ -26,54 +25,52 @@ describe("git repository cloner", () => {
 			["--branch", "alpha"],
 		);
 
-		expect(repository.root).toContain(tmpDir);
+		expect(root).toContain(tmpDir);
 	});
 });
 
 describe("github repository cloner", () => {
 	it("adds token when specified and host is github.com", async () => {
-		const cloneFunc = jest
-			.fn<RepositoryCloner["clone"]>()
-			.mockResolvedValue(new Repository(""));
+		const sourceFunc = jest
+			.fn<RepositorySourcer["source"]>()
+			.mockResolvedValue("");
 
-		await new GitHubRepositoryCloner("token", { clone: cloneFunc }).clone(
-			"https://github.com/repo",
-			"branch",
-		);
+		await new GitHubRepositorySourcer("token", {
+			source: sourceFunc,
+		}).source("https://github.com/repo", "branch");
 
-		expect(cloneFunc).toHaveBeenCalledWith(
+		expect(sourceFunc).toHaveBeenCalledWith(
 			"https://github_actions:token@github.com/repo",
 			"branch",
 		);
 	});
 
 	it("ignores token when not specified and host is github.com", async () => {
-		const cloneFunc = jest
-			.fn<RepositoryCloner["clone"]>()
-			.mockResolvedValue(new Repository(""));
+		const sourceFunc = jest
+			.fn<RepositorySourcer["source"]>()
+			.mockResolvedValue("");
 
-		await new GitHubRepositoryCloner(null, { clone: cloneFunc }).clone(
+		await new GitHubRepositorySourcer(null, { source: sourceFunc }).source(
 			"https://github.com/repo",
 			"branch",
 		);
 
-		expect(cloneFunc).toHaveBeenCalledWith(
+		expect(sourceFunc).toHaveBeenCalledWith(
 			"https://github.com/repo",
 			"branch",
 		);
 	});
 
 	it("ignores token when specified but host is not github.com", async () => {
-		const cloneFunc = jest
-			.fn<RepositoryCloner["clone"]>()
-			.mockResolvedValue(new Repository(""));
+		const sourceFunc = jest
+			.fn<RepositorySourcer["source"]>()
+			.mockResolvedValue("");
 
-		await new GitHubRepositoryCloner("token", { clone: cloneFunc }).clone(
-			"https://gitlab.com/repo",
-			"branch",
-		);
+		await new GitHubRepositorySourcer("token", {
+			source: sourceFunc,
+		}).source("https://gitlab.com/repo", "branch");
 
-		expect(cloneFunc).toHaveBeenCalledWith(
+		expect(sourceFunc).toHaveBeenCalledWith(
 			"https://gitlab.com/repo",
 			"branch",
 		);
