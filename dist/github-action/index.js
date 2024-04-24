@@ -41491,25 +41491,6 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 2752:
-/***/ ((module) => {
-
-function webpackEmptyAsyncContext(req) {
-	// Here Promise.resolve().then() is used instead of new Promise() to prevent
-	// uncaught exception popping up in devtools
-	return Promise.resolve().then(() => {
-		var e = new Error("Cannot find module '" + req + "'");
-		e.code = 'MODULE_NOT_FOUND';
-		throw e;
-	});
-}
-webpackEmptyAsyncContext.keys = () => ([]);
-webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
-webpackEmptyAsyncContext.id = 2752;
-module.exports = webpackEmptyAsyncContext;
-
-/***/ }),
-
 /***/ 9491:
 /***/ ((module) => {
 
@@ -43366,11 +43347,6 @@ module.exports = parseParams
 /******/ }
 /******/ 
 /************************************************************************/
-/******/ /* webpack/runtime/hasOwnProperty shorthand */
-/******/ (() => {
-/******/ 	__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ })();
-/******/ 
 /******/ /* webpack/runtime/compat */
 /******/ 
 /******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
@@ -52395,7 +52371,9 @@ async function loadPluginFactory(name, repositoryRoot) {
     // First check if this is a local .js file
     const localPath = (0,external_path_.resolve)(repositoryRoot, name);
     const importPath = (await (0,lib.pathExists)(localPath)) ? localPath : name;
-    return (await __nccwpck_require__(2752)(importPath)).default;
+    // See: https://github.com/vercel/ncc/issues/935
+    const _import = new Function("p", "return import(p)");
+    return (await _import(importPath)).default;
 }
 
 ;// CONCATENATED MODULE: external "node:process"
