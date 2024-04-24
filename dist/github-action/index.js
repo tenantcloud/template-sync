@@ -52280,22 +52280,29 @@ const optionsSchema = z.strictObject({
 ;// CONCATENATED MODULE: ./src/plugins/standard/composer.ts
 
 
+
 const composer_optionsSchema = z.strictObject({});
 /* harmony default export */ const composer = ((rawOptions) => {
     composer_optionsSchema.parse(rawOptions);
     return async function (template, source) {
         const templateComposerJson = await readJson(template.path("composer.json"));
         const sourceComposerJson = await readJson(source.path("composer.json"));
+        const prepareRequire = (require) => {
+            if (!sourceComposerJson.name) {
+                return require;
+            }
+            return commonjs.omit(require, [sourceComposerJson.name]);
+        };
         await writeJson(source.path("composer.json"), {
             ...sourceComposerJson,
-            require: {
+            require: prepareRequire({
                 ...sourceComposerJson["require"],
                 ...templateComposerJson["require"],
-            },
-            "require-dev": {
+            }),
+            "require-dev": prepareRequire({
                 ...sourceComposerJson["require-dev"],
                 ...templateComposerJson["require-dev"],
-            },
+            }),
             scripts: {
                 ...sourceComposerJson["scripts"],
                 ...templateComposerJson["scripts"],

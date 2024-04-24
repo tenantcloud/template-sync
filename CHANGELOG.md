@@ -1,3 +1,10 @@
+# [1.0.0-alpha.11](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2024-04-24)
+
+
+### Features
+
+* Do not add source package name into composer require sections ([8c5b948](https://github.com/tenantcloud/template-sync/commit/8c5b948b6403c43ec9cdee3cb81d352badfab674))
+
 # [1.0.0-alpha.10](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2024-04-24)
 
 
