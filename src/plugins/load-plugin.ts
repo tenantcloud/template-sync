@@ -33,8 +33,11 @@ async function loadPluginFactory(
 	const localPath = resolve(repositoryRoot, name);
 	const importPath = (await pathExists(localPath)) ? localPath : name;
 
+	// See: https://github.com/vercel/ncc/issues/935
+	const _import = new Function("p", "return import(p)");
+
 	return (
-		(await import(importPath)) as unknown as {
+		(await _import(importPath)) as unknown as {
 			default: PluginFactory;
 		}
 	).default;
