@@ -1,3 +1,10 @@
+# [1.0.0-alpha.10](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2024-04-24)
+
+
+### Bug Fixes
+
+* Dynamic import when compiled with ncc ([e79693d](https://github.com/tenantcloud/template-sync/commit/e79693d23083d40d240e8f5afa73364648cc3f3f))
+
 # [1.0.0-alpha.9](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.8...v1.0.0-alpha.9) (2024-04-24)
 
 
