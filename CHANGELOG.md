@@ -1,3 +1,10 @@
+# [1.0.0-alpha.9](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.8...v1.0.0-alpha.9) (2024-04-24)
+
+
+### Features
+
+* Add support for source plugins ([d2c4751](https://github.com/tenantcloud/template-sync/commit/d2c4751f484da5157aaae8cfb43bf9e0470652a8))
+
 # [1.0.0-alpha.8](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.7...v1.0.0-alpha.8) (2024-04-23)
 
 

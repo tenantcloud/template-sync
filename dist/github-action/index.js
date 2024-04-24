@@ -4347,13 +4347,13 @@ module.exports = setup;
 if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
 	module.exports = __nccwpck_require__(8222);
 } else {
-	module.exports = __nccwpck_require__(5879);
+	module.exports = __nccwpck_require__(4874);
 }
 
 
 /***/ }),
 
-/***/ 5879:
+/***/ 4874:
 /***/ ((module, exports, __nccwpck_require__) => {
 
 /**
@@ -7665,7 +7665,7 @@ module.exports = {
 
 
 const fs = __nccwpck_require__(1176)
-const { checkPath } = __nccwpck_require__(8117)
+const { checkPath } = __nccwpck_require__(9907)
 
 const getMode = options => {
   const defaults = { mode: 0o777 }
@@ -7694,7 +7694,7 @@ module.exports.makeDirSync = (dir, options) => {
 
 /***/ }),
 
-/***/ 8117:
+/***/ 9907:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // Adapted from https://github.com/sindresorhus/make-dir
@@ -15136,11 +15136,11 @@ __exportStar(__nccwpck_require__(2679), exports);
 __exportStar(__nccwpck_require__(1248), exports);
 __exportStar(__nccwpck_require__(1776), exports);
 __exportStar(__nccwpck_require__(1653), exports);
-__exportStar(__nccwpck_require__(9907), exports);
+__exportStar(__nccwpck_require__(7554), exports);
 __exportStar(__nccwpck_require__(4359), exports);
 __exportStar(__nccwpck_require__(4547), exports);
 __exportStar(__nccwpck_require__(1441), exports);
-__exportStar(__nccwpck_require__(4874), exports);
+__exportStar(__nccwpck_require__(8703), exports);
 __exportStar(__nccwpck_require__(7308), exports);
 __exportStar(__nccwpck_require__(8729), exports);
 __exportStar(__nccwpck_require__(7814), exports);
@@ -16720,7 +16720,7 @@ exports.purry = purry;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.randomString = void 0;
 var purry_1 = __nccwpck_require__(7030);
-var times_1 = __nccwpck_require__(9907);
+var times_1 = __nccwpck_require__(7554);
 var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 function randomString() {
     return (0, purry_1.purry)(randomStringImplementation, arguments);
@@ -17582,7 +17582,7 @@ function _tap(value, fn) {
 
 /***/ }),
 
-/***/ 9907:
+/***/ 7554:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 
@@ -17675,7 +17675,7 @@ function _uniq(array) {
 
 /***/ }),
 
-/***/ 4874:
+/***/ 8703:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 
@@ -43388,747 +43388,35 @@ var external_os_ = __nccwpck_require__(2037);
 var external_path_ = __nccwpck_require__(1017);
 ;// CONCATENATED MODULE: external "node:crypto"
 const external_node_crypto_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:crypto");
-// EXTERNAL MODULE: ./node_modules/remeda/dist/commonjs/index.js
-var commonjs = __nccwpck_require__(8886);
-;// CONCATENATED MODULE: external "node:process"
-const external_node_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:process");
-;// CONCATENATED MODULE: external "node:fs"
-const external_node_fs_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs");
-;// CONCATENATED MODULE: external "node:path"
-const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
-// EXTERNAL MODULE: external "node:events"
-var external_node_events_ = __nccwpck_require__(5673);
-// EXTERNAL MODULE: external "node:stream"
-var external_node_stream_ = __nccwpck_require__(4492);
-;// CONCATENATED MODULE: external "node:stream/promises"
-const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:stream/promises");
-;// CONCATENATED MODULE: ./node_modules/@sindresorhus/merge-streams/index.js
+;// CONCATENATED MODULE: ./src/repositories/sourcing.ts
 
 
-
-
-function mergeStreams(streams) {
-	if (!Array.isArray(streams)) {
-		throw new TypeError(`Expected an array, got \`${typeof streams}\`.`);
-	}
-
-	for (const stream of streams) {
-		validateStream(stream);
-	}
-
-	const objectMode = streams.some(({readableObjectMode}) => readableObjectMode);
-	const highWaterMark = getHighWaterMark(streams, objectMode);
-	const passThroughStream = new MergedStream({
-		objectMode,
-		writableHighWaterMark: highWaterMark,
-		readableHighWaterMark: highWaterMark,
-	});
-
-	for (const stream of streams) {
-		passThroughStream.add(stream);
-	}
-
-	if (streams.length === 0) {
-		endStream(passThroughStream);
-	}
-
-	return passThroughStream;
-}
-
-const getHighWaterMark = (streams, objectMode) => {
-	if (streams.length === 0) {
-		// @todo Use `node:stream` `getDefaultHighWaterMark(objectMode)` in next major release
-		return 16_384;
-	}
-
-	const highWaterMarks = streams
-		.filter(({readableObjectMode}) => readableObjectMode === objectMode)
-		.map(({readableHighWaterMark}) => readableHighWaterMark);
-	return Math.max(...highWaterMarks);
-};
-
-class MergedStream extends external_node_stream_.PassThrough {
-	#streams = new Set([]);
-	#ended = new Set([]);
-	#aborted = new Set([]);
-	#onFinished;
-
-	add(stream) {
-		validateStream(stream);
-
-		if (this.#streams.has(stream)) {
-			return;
-		}
-
-		this.#streams.add(stream);
-
-		this.#onFinished ??= onMergedStreamFinished(this, this.#streams);
-		endWhenStreamsDone({
-			passThroughStream: this,
-			stream,
-			streams: this.#streams,
-			ended: this.#ended,
-			aborted: this.#aborted,
-			onFinished: this.#onFinished,
-		});
-
-		stream.pipe(this, {end: false});
-	}
-
-	remove(stream) {
-		validateStream(stream);
-
-		if (!this.#streams.has(stream)) {
-			return false;
-		}
-
-		stream.unpipe(this);
-		return true;
-	}
-}
-
-const onMergedStreamFinished = async (passThroughStream, streams) => {
-	updateMaxListeners(passThroughStream, PASSTHROUGH_LISTENERS_COUNT);
-	const controller = new AbortController();
-
-	try {
-		await Promise.race([
-			onMergedStreamEnd(passThroughStream, controller),
-			onInputStreamsUnpipe(passThroughStream, streams, controller),
-		]);
-	} finally {
-		controller.abort();
-		updateMaxListeners(passThroughStream, -PASSTHROUGH_LISTENERS_COUNT);
-	}
-};
-
-const onMergedStreamEnd = async (passThroughStream, {signal}) => {
-	await (0,promises_namespaceObject.finished)(passThroughStream, {signal, cleanup: true});
-};
-
-const onInputStreamsUnpipe = async (passThroughStream, streams, {signal}) => {
-	for await (const [unpipedStream] of (0,external_node_events_.on)(passThroughStream, 'unpipe', {signal})) {
-		if (streams.has(unpipedStream)) {
-			unpipedStream.emit(unpipeEvent);
-		}
-	}
-};
-
-const validateStream = stream => {
-	if (typeof stream?.pipe !== 'function') {
-		throw new TypeError(`Expected a readable stream, got: \`${typeof stream}\`.`);
-	}
-};
-
-const endWhenStreamsDone = async ({passThroughStream, stream, streams, ended, aborted, onFinished}) => {
-	updateMaxListeners(passThroughStream, PASSTHROUGH_LISTENERS_PER_STREAM);
-	const controller = new AbortController();
-
-	try {
-		await Promise.race([
-			afterMergedStreamFinished(onFinished, stream),
-			onInputStreamEnd({passThroughStream, stream, streams, ended, aborted, controller}),
-			onInputStreamUnpipe({stream, streams, ended, aborted, controller}),
-		]);
-	} finally {
-		controller.abort();
-		updateMaxListeners(passThroughStream, -PASSTHROUGH_LISTENERS_PER_STREAM);
-	}
-
-	if (streams.size === ended.size + aborted.size) {
-		if (ended.size === 0 && aborted.size > 0) {
-			abortStream(passThroughStream);
-		} else {
-			endStream(passThroughStream);
-		}
-	}
-};
-
-// This is the error thrown by `finished()` on `stream.destroy()`
-const isAbortError = error => error?.code === 'ERR_STREAM_PREMATURE_CLOSE';
-
-const afterMergedStreamFinished = async (onFinished, stream) => {
-	try {
-		await onFinished;
-		abortStream(stream);
-	} catch (error) {
-		if (isAbortError(error)) {
-			abortStream(stream);
-		} else {
-			errorStream(stream, error);
-		}
-	}
-};
-
-const onInputStreamEnd = async ({passThroughStream, stream, streams, ended, aborted, controller: {signal}}) => {
-	try {
-		await (0,promises_namespaceObject.finished)(stream, {signal, cleanup: true, readable: true, writable: false});
-		if (streams.has(stream)) {
-			ended.add(stream);
-		}
-	} catch (error) {
-		if (signal.aborted || !streams.has(stream)) {
-			return;
-		}
-
-		if (isAbortError(error)) {
-			aborted.add(stream);
-		} else {
-			errorStream(passThroughStream, error);
-		}
-	}
-};
-
-const onInputStreamUnpipe = async ({stream, streams, ended, aborted, controller: {signal}}) => {
-	await (0,external_node_events_.once)(stream, unpipeEvent, {signal});
-	streams.delete(stream);
-	ended.delete(stream);
-	aborted.delete(stream);
-};
-
-const unpipeEvent = Symbol('unpipe');
-
-const endStream = stream => {
-	if (stream.writable) {
-		stream.end();
-	}
-};
-
-const abortStream = stream => {
-	if (stream.readable || stream.writable) {
-		stream.destroy();
-	}
-};
-
-// `stream.destroy(error)` crashes the process with `uncaughtException` if no `error` event listener exists on `stream`.
-// We take care of error handling on user behalf, so we do not want this to happen.
-const errorStream = (stream, error) => {
-	if (!stream.destroyed) {
-		stream.once('error', noop);
-		stream.destroy(error);
-	}
-};
-
-const noop = () => {};
-
-const updateMaxListeners = (passThroughStream, increment) => {
-	const maxListeners = passThroughStream.getMaxListeners();
-	if (maxListeners !== 0 && maxListeners !== Number.POSITIVE_INFINITY) {
-		passThroughStream.setMaxListeners(maxListeners + increment);
-	}
-};
-
-// Number of times `passThroughStream.on()` is called regardless of streams:
-//  - once due to `finished(passThroughStream)`
-//  - once due to `on(passThroughStream)`
-const PASSTHROUGH_LISTENERS_COUNT = 2;
-
-// Number of times `passThroughStream.on()` is called per stream:
-//  - once due to `stream.pipe(passThroughStream)`
-const PASSTHROUGH_LISTENERS_PER_STREAM = 1;
-
-// EXTERNAL MODULE: ./node_modules/fast-glob/out/index.js
-var out = __nccwpck_require__(3664);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(7147);
-;// CONCATENATED MODULE: ./node_modules/globby/node_modules/path-type/index.js
-
-
-async function isType(fsStatType, statsMethodName, filePath) {
-	if (typeof filePath !== 'string') {
-		throw new TypeError(`Expected a string, got ${typeof filePath}`);
-	}
-
-	try {
-		const stats = await external_fs_.promises[fsStatType](filePath);
-		return stats[statsMethodName]();
-	} catch (error) {
-		if (error.code === 'ENOENT') {
-			return false;
-		}
-
-		throw error;
-	}
-}
-
-function isTypeSync(fsStatType, statsMethodName, filePath) {
-	if (typeof filePath !== 'string') {
-		throw new TypeError(`Expected a string, got ${typeof filePath}`);
-	}
-
-	try {
-		return external_fs_[fsStatType](filePath)[statsMethodName]();
-	} catch (error) {
-		if (error.code === 'ENOENT') {
-			return false;
-		}
-
-		throw error;
-	}
-}
-
-const isFile = isType.bind(null, 'stat', 'isFile');
-const isDirectory = isType.bind(null, 'stat', 'isDirectory');
-const isSymlink = isType.bind(null, 'lstat', 'isSymbolicLink');
-const isFileSync = isTypeSync.bind(null, 'statSync', 'isFile');
-const isDirectorySync = isTypeSync.bind(null, 'statSync', 'isDirectory');
-const isSymlinkSync = isTypeSync.bind(null, 'lstatSync', 'isSymbolicLink');
-
-;// CONCATENATED MODULE: external "node:url"
-const external_node_url_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:url");
-;// CONCATENATED MODULE: ./node_modules/unicorn-magic/node.js
-
-
-function toPath(urlOrPath) {
-	return urlOrPath instanceof URL ? (0,external_node_url_namespaceObject.fileURLToPath)(urlOrPath) : urlOrPath;
-}
-
-
-
-;// CONCATENATED MODULE: external "node:fs/promises"
-const external_node_fs_promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs/promises");
-// EXTERNAL MODULE: ./node_modules/ignore/index.js
-var ignore = __nccwpck_require__(4777);
-;// CONCATENATED MODULE: ./node_modules/globby/node_modules/slash/index.js
-function slash(path) {
-	const isExtendedLengthPath = path.startsWith('\\\\?\\');
-
-	if (isExtendedLengthPath) {
-		return path;
-	}
-
-	return path.replace(/\\/g, '/');
-}
-
-;// CONCATENATED MODULE: ./node_modules/globby/utilities.js
-const isNegativePattern = pattern => pattern[0] === '!';
-
-;// CONCATENATED MODULE: ./node_modules/globby/ignore.js
-
-
-
-
-
-
-
-
-
-
-const defaultIgnoredDirectories = [
-	'**/node_modules',
-	'**/flow-typed',
-	'**/coverage',
-	'**/.git',
-];
-const ignoreFilesGlobOptions = {
-	absolute: true,
-	dot: true,
-};
-
-const GITIGNORE_FILES_PATTERN = '**/.gitignore';
-
-const applyBaseToPattern = (pattern, base) => isNegativePattern(pattern)
-	? '!' + external_node_path_namespaceObject.posix.join(base, pattern.slice(1))
-	: external_node_path_namespaceObject.posix.join(base, pattern);
-
-const parseIgnoreFile = (file, cwd) => {
-	const base = slash(external_node_path_namespaceObject.relative(cwd, external_node_path_namespaceObject.dirname(file.filePath)));
-
-	return file.content
-		.split(/\r?\n/)
-		.filter(line => line && !line.startsWith('#'))
-		.map(pattern => applyBaseToPattern(pattern, base));
-};
-
-const toRelativePath = (fileOrDirectory, cwd) => {
-	cwd = slash(cwd);
-	if (external_node_path_namespaceObject.isAbsolute(fileOrDirectory)) {
-		if (slash(fileOrDirectory).startsWith(cwd)) {
-			return external_node_path_namespaceObject.relative(cwd, fileOrDirectory);
-		}
-
-		throw new Error(`Path ${fileOrDirectory} is not in cwd ${cwd}`);
-	}
-
-	return fileOrDirectory;
-};
-
-const getIsIgnoredPredicate = (files, cwd) => {
-	const patterns = files.flatMap(file => parseIgnoreFile(file, cwd));
-	const ignores = ignore().add(patterns);
-
-	return fileOrDirectory => {
-		fileOrDirectory = toPath(fileOrDirectory);
-		fileOrDirectory = toRelativePath(fileOrDirectory, cwd);
-		return fileOrDirectory ? ignores.ignores(slash(fileOrDirectory)) : false;
-	};
-};
-
-const normalizeOptions = (options = {}) => ({
-	cwd: toPath(options.cwd) ?? external_node_process_namespaceObject.cwd(),
-	suppressErrors: Boolean(options.suppressErrors),
-	deep: typeof options.deep === 'number' ? options.deep : Number.POSITIVE_INFINITY,
-	ignore: [...options.ignore ?? [], ...defaultIgnoredDirectories],
-});
-
-const isIgnoredByIgnoreFiles = async (patterns, options) => {
-	const {cwd, suppressErrors, deep, ignore} = normalizeOptions(options);
-
-	const paths = await out(patterns, {
-		cwd,
-		suppressErrors,
-		deep,
-		ignore,
-		...ignoreFilesGlobOptions,
-	});
-
-	const files = await Promise.all(
-		paths.map(async filePath => ({
-			filePath,
-			content: await external_node_fs_promises_namespaceObject.readFile(filePath, 'utf8'),
-		})),
-	);
-
-	return getIsIgnoredPredicate(files, cwd);
-};
-
-const isIgnoredByIgnoreFilesSync = (patterns, options) => {
-	const {cwd, suppressErrors, deep, ignore} = normalizeOptions(options);
-
-	const paths = out.sync(patterns, {
-		cwd,
-		suppressErrors,
-		deep,
-		ignore,
-		...ignoreFilesGlobOptions,
-	});
-
-	const files = paths.map(filePath => ({
-		filePath,
-		content: external_node_fs_namespaceObject.readFileSync(filePath, 'utf8'),
-	}));
-
-	return getIsIgnoredPredicate(files, cwd);
-};
-
-const isGitIgnored = options => isIgnoredByIgnoreFiles(GITIGNORE_FILES_PATTERN, options);
-const isGitIgnoredSync = options => isIgnoredByIgnoreFilesSync(GITIGNORE_FILES_PATTERN, options);
-
-;// CONCATENATED MODULE: ./node_modules/globby/index.js
-
-
-
-
-
-
-
-
-
-
-const assertPatternsInput = patterns => {
-	if (patterns.some(pattern => typeof pattern !== 'string')) {
-		throw new TypeError('Patterns must be a string or an array of strings');
-	}
-};
-
-const normalizePathForDirectoryGlob = (filePath, cwd) => {
-	const path = isNegativePattern(filePath) ? filePath.slice(1) : filePath;
-	return external_node_path_namespaceObject.isAbsolute(path) ? path : external_node_path_namespaceObject.join(cwd, path);
-};
-
-const getDirectoryGlob = ({directoryPath, files, extensions}) => {
-	const extensionGlob = extensions?.length > 0 ? `.${extensions.length > 1 ? `{${extensions.join(',')}}` : extensions[0]}` : '';
-	return files
-		? files.map(file => external_node_path_namespaceObject.posix.join(directoryPath, `**/${external_node_path_namespaceObject.extname(file) ? file : `${file}${extensionGlob}`}`))
-		: [external_node_path_namespaceObject.posix.join(directoryPath, `**${extensionGlob ? `/*${extensionGlob}` : ''}`)];
-};
-
-const directoryToGlob = async (directoryPaths, {
-	cwd = external_node_process_namespaceObject.cwd(),
-	files,
-	extensions,
-} = {}) => {
-	const globs = await Promise.all(directoryPaths.map(async directoryPath =>
-		(await isDirectory(normalizePathForDirectoryGlob(directoryPath, cwd))) ? getDirectoryGlob({directoryPath, files, extensions}) : directoryPath),
-	);
-
-	return globs.flat();
-};
-
-const directoryToGlobSync = (directoryPaths, {
-	cwd = external_node_process_namespaceObject.cwd(),
-	files,
-	extensions,
-} = {}) => directoryPaths.flatMap(directoryPath => isDirectorySync(normalizePathForDirectoryGlob(directoryPath, cwd)) ? getDirectoryGlob({directoryPath, files, extensions}) : directoryPath);
-
-const toPatternsArray = patterns => {
-	patterns = [...new Set([patterns].flat())];
-	assertPatternsInput(patterns);
-	return patterns;
-};
-
-const checkCwdOption = cwd => {
-	if (!cwd) {
-		return;
-	}
-
-	let stat;
-	try {
-		stat = external_node_fs_namespaceObject.statSync(cwd);
-	} catch {
-		return;
-	}
-
-	if (!stat.isDirectory()) {
-		throw new Error('The `cwd` option must be a path to a directory');
-	}
-};
-
-const globby_normalizeOptions = (options = {}) => {
-	options = {
-		...options,
-		ignore: options.ignore ?? [],
-		expandDirectories: options.expandDirectories ?? true,
-		cwd: toPath(options.cwd),
-	};
-
-	checkCwdOption(options.cwd);
-
-	return options;
-};
-
-const normalizeArguments = function_ => async (patterns, options) => function_(toPatternsArray(patterns), globby_normalizeOptions(options));
-const normalizeArgumentsSync = function_ => (patterns, options) => function_(toPatternsArray(patterns), globby_normalizeOptions(options));
-
-const getIgnoreFilesPatterns = options => {
-	const {ignoreFiles, gitignore} = options;
-
-	const patterns = ignoreFiles ? toPatternsArray(ignoreFiles) : [];
-	if (gitignore) {
-		patterns.push(GITIGNORE_FILES_PATTERN);
-	}
-
-	return patterns;
-};
-
-const getFilter = async options => {
-	const ignoreFilesPatterns = getIgnoreFilesPatterns(options);
-	return createFilterFunction(
-		ignoreFilesPatterns.length > 0 && await isIgnoredByIgnoreFiles(ignoreFilesPatterns, options),
-	);
-};
-
-const getFilterSync = options => {
-	const ignoreFilesPatterns = getIgnoreFilesPatterns(options);
-	return createFilterFunction(
-		ignoreFilesPatterns.length > 0 && isIgnoredByIgnoreFilesSync(ignoreFilesPatterns, options),
-	);
-};
-
-const createFilterFunction = isIgnored => {
-	const seen = new Set();
-
-	return fastGlobResult => {
-		const pathKey = external_node_path_namespaceObject.normalize(fastGlobResult.path ?? fastGlobResult);
-
-		if (seen.has(pathKey) || (isIgnored && isIgnored(pathKey))) {
-			return false;
-		}
-
-		seen.add(pathKey);
-
-		return true;
-	};
-};
-
-const unionFastGlobResults = (results, filter) => results.flat().filter(fastGlobResult => filter(fastGlobResult));
-
-const convertNegativePatterns = (patterns, options) => {
-	const tasks = [];
-
-	while (patterns.length > 0) {
-		const index = patterns.findIndex(pattern => isNegativePattern(pattern));
-
-		if (index === -1) {
-			tasks.push({patterns, options});
-			break;
-		}
-
-		const ignorePattern = patterns[index].slice(1);
-
-		for (const task of tasks) {
-			task.options.ignore.push(ignorePattern);
-		}
-
-		if (index !== 0) {
-			tasks.push({
-				patterns: patterns.slice(0, index),
-				options: {
-					...options,
-					ignore: [
-						...options.ignore,
-						ignorePattern,
-					],
-				},
-			});
-		}
-
-		patterns = patterns.slice(index + 1);
-	}
-
-	return tasks;
-};
-
-const normalizeExpandDirectoriesOption = (options, cwd) => ({
-	...(cwd ? {cwd} : {}),
-	...(Array.isArray(options) ? {files: options} : options),
-});
-
-const generateTasks = async (patterns, options) => {
-	const globTasks = convertNegativePatterns(patterns, options);
-
-	const {cwd, expandDirectories} = options;
-
-	if (!expandDirectories) {
-		return globTasks;
-	}
-
-	const directoryToGlobOptions = normalizeExpandDirectoriesOption(expandDirectories, cwd);
-
-	return Promise.all(
-		globTasks.map(async task => {
-			let {patterns, options} = task;
-
-			[
-				patterns,
-				options.ignore,
-			] = await Promise.all([
-				directoryToGlob(patterns, directoryToGlobOptions),
-				directoryToGlob(options.ignore, {cwd}),
-			]);
-
-			return {patterns, options};
-		}),
-	);
-};
-
-const generateTasksSync = (patterns, options) => {
-	const globTasks = convertNegativePatterns(patterns, options);
-	const {cwd, expandDirectories} = options;
-
-	if (!expandDirectories) {
-		return globTasks;
-	}
-
-	const directoryToGlobSyncOptions = normalizeExpandDirectoriesOption(expandDirectories, cwd);
-
-	return globTasks.map(task => {
-		let {patterns, options} = task;
-		patterns = directoryToGlobSync(patterns, directoryToGlobSyncOptions);
-		options.ignore = directoryToGlobSync(options.ignore, {cwd});
-		return {patterns, options};
-	});
-};
-
-const globby = normalizeArguments(async (patterns, options) => {
-	const [
-		tasks,
-		filter,
-	] = await Promise.all([
-		generateTasks(patterns, options),
-		getFilter(options),
-	]);
-
-	const results = await Promise.all(tasks.map(task => out(task.patterns, task.options)));
-	return unionFastGlobResults(results, filter);
-});
-
-const globbySync = normalizeArgumentsSync((patterns, options) => {
-	const tasks = generateTasksSync(patterns, options);
-	const filter = getFilterSync(options);
-	const results = tasks.map(task => out.sync(task.patterns, task.options));
-	return unionFastGlobResults(results, filter);
-});
-
-const globbyStream = normalizeArgumentsSync((patterns, options) => {
-	const tasks = generateTasksSync(patterns, options);
-	const filter = getFilterSync(options);
-	const streams = tasks.map(task => out.stream(task.patterns, task.options));
-	const stream = mergeStreams(streams).filter(fastGlobResult => filter(fastGlobResult));
-
-	// TODO: Make it return a web stream at some point.
-	// return Readable.toWeb(stream);
-
-	return stream;
-});
-
-const isDynamicPattern = normalizeArgumentsSync(
-	(patterns, options) => patterns.some(pattern => out.isDynamicPattern(pattern, options)),
-);
-
-const generateGlobTasks = normalizeArguments(generateTasks);
-const generateGlobTasksSync = normalizeArgumentsSync(generateTasksSync);
-
-
-
-const {convertPathToPattern} = out;
-
-;// CONCATENATED MODULE: ./src/glob.ts
-
-
-async function glob(patterns, root, ignore = []) {
-    if (typeof patterns === "string") {
-        patterns = [patterns];
-    }
-    return commonjs.difference.multiset(await globby([...patterns, "!.git/**/*"], { cwd: root, dot: true }), ignore);
-}
-
-;// CONCATENATED MODULE: ./src/repositories/repository.ts
-
-
-class Repository {
-    root;
-    constructor(root) {
-        this.root = root;
-    }
-    path(relative) {
-        return (0,external_path_.join)(this.root, relative);
-    }
-    async files(patterns = ["**/*"], ignore = []) {
-        return await glob(patterns, this.root, ignore);
-    }
-}
-
-;// CONCATENATED MODULE: ./src/repositories/cloning.ts
-
-
-
-class GitRepositoryCloner {
+class GitRepositorySourcer {
     tmpDir;
     git;
     constructor(tmpDir, git) {
         this.tmpDir = tmpDir;
         this.git = git;
     }
-    async clone(url, branch) {
+    async source(url, branch) {
         const destination = (0,external_path_.resolve)(this.tmpDir, (0,external_node_crypto_namespaceObject.randomUUID)());
         await this.git.clone(url, destination, ["--branch", branch]);
-        return new Repository(destination);
+        return destination;
     }
 }
-class GitHubRepositoryCloner {
+class GitHubRepositorySourcer {
     token;
     delegate;
     constructor(token, delegate) {
         this.token = token;
         this.delegate = delegate;
     }
-    async clone(url, branch) {
+    async source(url, branch) {
         if (this.token && url.includes("https://github.com")) {
             const authToken = `github_actions:${this.token}@`;
             url = url.replace("https://github.com", `https://${authToken}github.com`);
         }
-        return await this.delegate.clone(url, branch);
+        return await this.delegate.source(url, branch);
     }
 }
 
@@ -44140,6 +43428,8 @@ var src = __nccwpck_require__(8237);
 const external_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("child_process");
 // EXTERNAL MODULE: ./node_modules/@kwsites/promise-deferred/dist/index.js
 var promise_deferred_dist = __nccwpck_require__(9819);
+// EXTERNAL MODULE: external "node:events"
+var external_node_events_ = __nccwpck_require__(5673);
 ;// CONCATENATED MODULE: ./node_modules/simple-git/dist/esm/index.js
 var __defProp = Object.defineProperty;
 var __defProps = Object.defineProperties;
@@ -52908,78 +52198,75 @@ var z = /*#__PURE__*/Object.freeze({
 
 
 ;// CONCATENATED MODULE: external "fs/promises"
-const external_fs_promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
-;// CONCATENATED MODULE: ./src/utils.ts
-
-async function readJson(path) {
-    return JSON.parse((await (0,external_fs_promises_namespaceObject.readFile)(path)).toString());
-}
-async function writeJson(path, obj) {
-    await (0,external_fs_promises_namespaceObject.writeFile)(path, JSON.stringify(obj));
-}
-
+const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
 // EXTERNAL MODULE: ./node_modules/fs-extra/lib/index.js
 var lib = __nccwpck_require__(5630);
-;// CONCATENATED MODULE: ./src/config.ts
+;// CONCATENATED MODULE: ./src/utils.ts
 
 
 
-
-const sourceConfigSchema = z.strictObject({
-    repositories: z.array(z.strictObject({
-        url: z.string().min(1),
-        branch: z.string().min(1),
-    }))
-        .min(1),
-});
-const templateConfigSchema = z.strictObject({
-    plugins: z.array(z.union([
-        z.string().min(1),
-        z.object({
-            name: z.string().min(1),
-        })
-            .passthrough(),
-    ])
-        .transform((value) => {
-        if (typeof value === "string") {
-            value = {
-                name: value,
-            };
-        }
-        return value;
-    }))
-        .min(1),
-});
-const SOURCE_CONFIG_FILE_NAME = "template-sync.json";
-const POSSIBLE_SOURCE_CONFIG_FILE_NAMES = [
-    SOURCE_CONFIG_FILE_NAME,
-    ".github/" + SOURCE_CONFIG_FILE_NAME,
-];
-async function loadSourceConfig(root) {
-    const rawConfig = await loadConfigFromPossible(root, POSSIBLE_SOURCE_CONFIG_FILE_NAMES);
-    return sourceConfigSchema.parse(rawConfig);
+async function readJson(path) {
+    return JSON.parse((await (0,promises_namespaceObject.readFile)(path)).toString());
 }
-const TEMPLATE_CONFIG_FILE_NAME = "template-sync.template.json";
-const POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES = [
-    TEMPLATE_CONFIG_FILE_NAME,
-    ".github/" + TEMPLATE_CONFIG_FILE_NAME,
-];
-async function loadTemplateConfig(root) {
-    const rawConfig = await loadConfigFromPossible(root, POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES);
-    return templateConfigSchema.parse(rawConfig);
+async function writeJson(path, obj) {
+    await (0,promises_namespaceObject.writeFile)(path, JSON.stringify(obj));
 }
-async function loadConfigFromPossible(root, possibleFileNames) {
+async function firstExistingPath(root, possibleFileNames) {
     for (const fileName of possibleFileNames) {
         const path = (0,external_path_.join)(root, fileName);
         if (!(await (0,lib.pathExists)(path))) {
             continue;
         }
-        console.debug("Found config at " + fileName);
-        return await readJson(path);
+        return fileName;
     }
-    throw new Error("Could not find config in these paths: " + possibleFileNames.join(", "));
+    throw new Error("Could not find file in these paths: " + possibleFileNames.join(", "));
 }
 
+;// CONCATENATED MODULE: ./src/config.ts
+
+
+const pluginsSchema = z.array(z.union([
+    z.string().min(1),
+    z.object({
+        name: z.string().min(1),
+    })
+        .passthrough(),
+])
+    .transform((value) => {
+    if (typeof value === "string") {
+        value = {
+            name: value,
+        };
+    }
+    return value;
+}));
+const sourceConfigSchema = z.strictObject({
+    repositories: z.array(z.strictObject({
+        url: z.string().min(1),
+        branch: z.string().min(1),
+        after: z.strictObject({
+            plugins: pluginsSchema,
+        })
+            .default({
+            plugins: [],
+        }),
+    }))
+        .min(1),
+});
+const templateConfigSchema = z.strictObject({
+    plugins: pluginsSchema.min(1),
+});
+async function loadSourceConfig(path) {
+    console.debug(`Loading source config from ${path}`);
+    return sourceConfigSchema.parse(await readJson(path));
+}
+async function loadTemplateConfig(path) {
+    console.debug(`Loading template config from ${path}`);
+    return templateConfigSchema.parse(await readJson(path));
+}
+
+// EXTERNAL MODULE: ./node_modules/remeda/dist/commonjs/index.js
+var commonjs = __nccwpck_require__(8886);
 ;// CONCATENATED MODULE: ./src/plugins/standard/sync.ts
 
 
@@ -52997,7 +52284,7 @@ const optionsSchema = z.strictObject({
         console.debug(`Files from the template: ${templateFiles.join(", ")}`);
         for (const file of templateFiles) {
             await (0,lib.ensureDir)((0,external_path_.dirname)(source.path(file)));
-            await (0,external_fs_promises_namespaceObject.copyFile)(template.path(file), source.path(file));
+            await (0,promises_namespaceObject.copyFile)(template.path(file), source.path(file));
         }
         if (options.deleteExtra) {
             const sourceFiles = await source.files(options.filter, reserved);
@@ -53005,7 +52292,7 @@ const optionsSchema = z.strictObject({
             const extraFiles = commonjs.difference.multiset(sourceFiles, templateFiles);
             console.debug(`Deleting extra non-matching files: ${extraFiles.join(", ")}`);
             for (const file of extraFiles) {
-                await (0,external_fs_promises_namespaceObject.unlink)(source.path(file));
+                await (0,promises_namespaceObject.unlink)(source.path(file));
             }
         }
         return {
@@ -53044,12 +52331,50 @@ const composer_optionsSchema = z.strictObject({});
     };
 });
 
+;// CONCATENATED MODULE: ./src/plugins/standard/template-sync.ts
+
+
+
+const template_sync_optionsSchema = z.strictObject({});
+/* harmony default export */ const template_sync = ((rawOptions) => {
+    template_sync_optionsSchema.parse(rawOptions);
+    const buildRepositories = (templateRepositories, sourceRepositories) => {
+        const result = commonjs.mapToObj(templateRepositories, (r) => [r.url, r]);
+        for (const sourceRepository of sourceRepositories) {
+            const templateRepository = commonjs.pick(result[sourceRepository.url] ?? {}, ["branch"]);
+            // Add all the repositories from source, but make sure to use the branch from the template.
+            result[sourceRepository.url] = {
+                ...sourceRepository,
+                ...templateRepository,
+            };
+        }
+        return Object.values(result);
+    };
+    return async function (template, source) {
+        const sourceConfigFileName = await source.sourceConfigFileName();
+        if (sourceConfigFileName !== (await template.sourceConfigFileName())) {
+            throw new Error(`Config file locations must match between source and template. Expected config at: ${sourceConfigFileName}`);
+        }
+        const templateSourceConfigJson = await readJson(template.path(sourceConfigFileName));
+        const sourceConfigJson = await readJson(source.path(sourceConfigFileName));
+        await writeJson(source.path(sourceConfigFileName), {
+            ...sourceConfigJson,
+            repositories: buildRepositories(templateSourceConfigJson.repositories, sourceConfigJson.repositories),
+        });
+        return {
+            reserved: [sourceConfigFileName],
+        };
+    };
+});
+
 ;// CONCATENATED MODULE: ./src/plugins/standard/plugins.ts
+
 
 
 const standardPlugins = {
     sync: sync,
     composer: composer,
+    "template-sync": template_sync,
 };
 
 ;// CONCATENATED MODULE: ./src/plugins/load-plugin.ts
@@ -53073,29 +52398,769 @@ async function loadPluginFactory(name, repositoryRoot) {
     return (await __nccwpck_require__(2752)(importPath)).default;
 }
 
+;// CONCATENATED MODULE: external "node:process"
+const external_node_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:process");
+;// CONCATENATED MODULE: external "node:fs"
+const external_node_fs_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs");
+;// CONCATENATED MODULE: external "node:path"
+const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
+// EXTERNAL MODULE: external "node:stream"
+var external_node_stream_ = __nccwpck_require__(4492);
+;// CONCATENATED MODULE: external "node:stream/promises"
+const external_node_stream_promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:stream/promises");
+;// CONCATENATED MODULE: ./node_modules/@sindresorhus/merge-streams/index.js
+
+
+
+
+function mergeStreams(streams) {
+	if (!Array.isArray(streams)) {
+		throw new TypeError(`Expected an array, got \`${typeof streams}\`.`);
+	}
+
+	for (const stream of streams) {
+		validateStream(stream);
+	}
+
+	const objectMode = streams.some(({readableObjectMode}) => readableObjectMode);
+	const highWaterMark = getHighWaterMark(streams, objectMode);
+	const passThroughStream = new MergedStream({
+		objectMode,
+		writableHighWaterMark: highWaterMark,
+		readableHighWaterMark: highWaterMark,
+	});
+
+	for (const stream of streams) {
+		passThroughStream.add(stream);
+	}
+
+	if (streams.length === 0) {
+		endStream(passThroughStream);
+	}
+
+	return passThroughStream;
+}
+
+const getHighWaterMark = (streams, objectMode) => {
+	if (streams.length === 0) {
+		// @todo Use `node:stream` `getDefaultHighWaterMark(objectMode)` in next major release
+		return 16_384;
+	}
+
+	const highWaterMarks = streams
+		.filter(({readableObjectMode}) => readableObjectMode === objectMode)
+		.map(({readableHighWaterMark}) => readableHighWaterMark);
+	return Math.max(...highWaterMarks);
+};
+
+class MergedStream extends external_node_stream_.PassThrough {
+	#streams = new Set([]);
+	#ended = new Set([]);
+	#aborted = new Set([]);
+	#onFinished;
+
+	add(stream) {
+		validateStream(stream);
+
+		if (this.#streams.has(stream)) {
+			return;
+		}
+
+		this.#streams.add(stream);
+
+		this.#onFinished ??= onMergedStreamFinished(this, this.#streams);
+		endWhenStreamsDone({
+			passThroughStream: this,
+			stream,
+			streams: this.#streams,
+			ended: this.#ended,
+			aborted: this.#aborted,
+			onFinished: this.#onFinished,
+		});
+
+		stream.pipe(this, {end: false});
+	}
+
+	remove(stream) {
+		validateStream(stream);
+
+		if (!this.#streams.has(stream)) {
+			return false;
+		}
+
+		stream.unpipe(this);
+		return true;
+	}
+}
+
+const onMergedStreamFinished = async (passThroughStream, streams) => {
+	updateMaxListeners(passThroughStream, PASSTHROUGH_LISTENERS_COUNT);
+	const controller = new AbortController();
+
+	try {
+		await Promise.race([
+			onMergedStreamEnd(passThroughStream, controller),
+			onInputStreamsUnpipe(passThroughStream, streams, controller),
+		]);
+	} finally {
+		controller.abort();
+		updateMaxListeners(passThroughStream, -PASSTHROUGH_LISTENERS_COUNT);
+	}
+};
+
+const onMergedStreamEnd = async (passThroughStream, {signal}) => {
+	await (0,external_node_stream_promises_namespaceObject.finished)(passThroughStream, {signal, cleanup: true});
+};
+
+const onInputStreamsUnpipe = async (passThroughStream, streams, {signal}) => {
+	for await (const [unpipedStream] of (0,external_node_events_.on)(passThroughStream, 'unpipe', {signal})) {
+		if (streams.has(unpipedStream)) {
+			unpipedStream.emit(unpipeEvent);
+		}
+	}
+};
+
+const validateStream = stream => {
+	if (typeof stream?.pipe !== 'function') {
+		throw new TypeError(`Expected a readable stream, got: \`${typeof stream}\`.`);
+	}
+};
+
+const endWhenStreamsDone = async ({passThroughStream, stream, streams, ended, aborted, onFinished}) => {
+	updateMaxListeners(passThroughStream, PASSTHROUGH_LISTENERS_PER_STREAM);
+	const controller = new AbortController();
+
+	try {
+		await Promise.race([
+			afterMergedStreamFinished(onFinished, stream),
+			onInputStreamEnd({passThroughStream, stream, streams, ended, aborted, controller}),
+			onInputStreamUnpipe({stream, streams, ended, aborted, controller}),
+		]);
+	} finally {
+		controller.abort();
+		updateMaxListeners(passThroughStream, -PASSTHROUGH_LISTENERS_PER_STREAM);
+	}
+
+	if (streams.size === ended.size + aborted.size) {
+		if (ended.size === 0 && aborted.size > 0) {
+			abortStream(passThroughStream);
+		} else {
+			endStream(passThroughStream);
+		}
+	}
+};
+
+// This is the error thrown by `finished()` on `stream.destroy()`
+const isAbortError = error => error?.code === 'ERR_STREAM_PREMATURE_CLOSE';
+
+const afterMergedStreamFinished = async (onFinished, stream) => {
+	try {
+		await onFinished;
+		abortStream(stream);
+	} catch (error) {
+		if (isAbortError(error)) {
+			abortStream(stream);
+		} else {
+			errorStream(stream, error);
+		}
+	}
+};
+
+const onInputStreamEnd = async ({passThroughStream, stream, streams, ended, aborted, controller: {signal}}) => {
+	try {
+		await (0,external_node_stream_promises_namespaceObject.finished)(stream, {signal, cleanup: true, readable: true, writable: false});
+		if (streams.has(stream)) {
+			ended.add(stream);
+		}
+	} catch (error) {
+		if (signal.aborted || !streams.has(stream)) {
+			return;
+		}
+
+		if (isAbortError(error)) {
+			aborted.add(stream);
+		} else {
+			errorStream(passThroughStream, error);
+		}
+	}
+};
+
+const onInputStreamUnpipe = async ({stream, streams, ended, aborted, controller: {signal}}) => {
+	await (0,external_node_events_.once)(stream, unpipeEvent, {signal});
+	streams.delete(stream);
+	ended.delete(stream);
+	aborted.delete(stream);
+};
+
+const unpipeEvent = Symbol('unpipe');
+
+const endStream = stream => {
+	if (stream.writable) {
+		stream.end();
+	}
+};
+
+const abortStream = stream => {
+	if (stream.readable || stream.writable) {
+		stream.destroy();
+	}
+};
+
+// `stream.destroy(error)` crashes the process with `uncaughtException` if no `error` event listener exists on `stream`.
+// We take care of error handling on user behalf, so we do not want this to happen.
+const errorStream = (stream, error) => {
+	if (!stream.destroyed) {
+		stream.once('error', noop);
+		stream.destroy(error);
+	}
+};
+
+const noop = () => {};
+
+const updateMaxListeners = (passThroughStream, increment) => {
+	const maxListeners = passThroughStream.getMaxListeners();
+	if (maxListeners !== 0 && maxListeners !== Number.POSITIVE_INFINITY) {
+		passThroughStream.setMaxListeners(maxListeners + increment);
+	}
+};
+
+// Number of times `passThroughStream.on()` is called regardless of streams:
+//  - once due to `finished(passThroughStream)`
+//  - once due to `on(passThroughStream)`
+const PASSTHROUGH_LISTENERS_COUNT = 2;
+
+// Number of times `passThroughStream.on()` is called per stream:
+//  - once due to `stream.pipe(passThroughStream)`
+const PASSTHROUGH_LISTENERS_PER_STREAM = 1;
+
+// EXTERNAL MODULE: ./node_modules/fast-glob/out/index.js
+var out = __nccwpck_require__(3664);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(7147);
+;// CONCATENATED MODULE: ./node_modules/globby/node_modules/path-type/index.js
+
+
+async function isType(fsStatType, statsMethodName, filePath) {
+	if (typeof filePath !== 'string') {
+		throw new TypeError(`Expected a string, got ${typeof filePath}`);
+	}
+
+	try {
+		const stats = await external_fs_.promises[fsStatType](filePath);
+		return stats[statsMethodName]();
+	} catch (error) {
+		if (error.code === 'ENOENT') {
+			return false;
+		}
+
+		throw error;
+	}
+}
+
+function isTypeSync(fsStatType, statsMethodName, filePath) {
+	if (typeof filePath !== 'string') {
+		throw new TypeError(`Expected a string, got ${typeof filePath}`);
+	}
+
+	try {
+		return external_fs_[fsStatType](filePath)[statsMethodName]();
+	} catch (error) {
+		if (error.code === 'ENOENT') {
+			return false;
+		}
+
+		throw error;
+	}
+}
+
+const isFile = isType.bind(null, 'stat', 'isFile');
+const isDirectory = isType.bind(null, 'stat', 'isDirectory');
+const isSymlink = isType.bind(null, 'lstat', 'isSymbolicLink');
+const isFileSync = isTypeSync.bind(null, 'statSync', 'isFile');
+const isDirectorySync = isTypeSync.bind(null, 'statSync', 'isDirectory');
+const isSymlinkSync = isTypeSync.bind(null, 'lstatSync', 'isSymbolicLink');
+
+;// CONCATENATED MODULE: external "node:url"
+const external_node_url_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:url");
+;// CONCATENATED MODULE: ./node_modules/unicorn-magic/node.js
+
+
+function toPath(urlOrPath) {
+	return urlOrPath instanceof URL ? (0,external_node_url_namespaceObject.fileURLToPath)(urlOrPath) : urlOrPath;
+}
+
+
+
+;// CONCATENATED MODULE: external "node:fs/promises"
+const external_node_fs_promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs/promises");
+// EXTERNAL MODULE: ./node_modules/ignore/index.js
+var ignore = __nccwpck_require__(4777);
+;// CONCATENATED MODULE: ./node_modules/globby/node_modules/slash/index.js
+function slash(path) {
+	const isExtendedLengthPath = path.startsWith('\\\\?\\');
+
+	if (isExtendedLengthPath) {
+		return path;
+	}
+
+	return path.replace(/\\/g, '/');
+}
+
+;// CONCATENATED MODULE: ./node_modules/globby/utilities.js
+const isNegativePattern = pattern => pattern[0] === '!';
+
+;// CONCATENATED MODULE: ./node_modules/globby/ignore.js
+
+
+
+
+
+
+
+
+
+
+const defaultIgnoredDirectories = [
+	'**/node_modules',
+	'**/flow-typed',
+	'**/coverage',
+	'**/.git',
+];
+const ignoreFilesGlobOptions = {
+	absolute: true,
+	dot: true,
+};
+
+const GITIGNORE_FILES_PATTERN = '**/.gitignore';
+
+const applyBaseToPattern = (pattern, base) => isNegativePattern(pattern)
+	? '!' + external_node_path_namespaceObject.posix.join(base, pattern.slice(1))
+	: external_node_path_namespaceObject.posix.join(base, pattern);
+
+const parseIgnoreFile = (file, cwd) => {
+	const base = slash(external_node_path_namespaceObject.relative(cwd, external_node_path_namespaceObject.dirname(file.filePath)));
+
+	return file.content
+		.split(/\r?\n/)
+		.filter(line => line && !line.startsWith('#'))
+		.map(pattern => applyBaseToPattern(pattern, base));
+};
+
+const toRelativePath = (fileOrDirectory, cwd) => {
+	cwd = slash(cwd);
+	if (external_node_path_namespaceObject.isAbsolute(fileOrDirectory)) {
+		if (slash(fileOrDirectory).startsWith(cwd)) {
+			return external_node_path_namespaceObject.relative(cwd, fileOrDirectory);
+		}
+
+		throw new Error(`Path ${fileOrDirectory} is not in cwd ${cwd}`);
+	}
+
+	return fileOrDirectory;
+};
+
+const getIsIgnoredPredicate = (files, cwd) => {
+	const patterns = files.flatMap(file => parseIgnoreFile(file, cwd));
+	const ignores = ignore().add(patterns);
+
+	return fileOrDirectory => {
+		fileOrDirectory = toPath(fileOrDirectory);
+		fileOrDirectory = toRelativePath(fileOrDirectory, cwd);
+		return fileOrDirectory ? ignores.ignores(slash(fileOrDirectory)) : false;
+	};
+};
+
+const normalizeOptions = (options = {}) => ({
+	cwd: toPath(options.cwd) ?? external_node_process_namespaceObject.cwd(),
+	suppressErrors: Boolean(options.suppressErrors),
+	deep: typeof options.deep === 'number' ? options.deep : Number.POSITIVE_INFINITY,
+	ignore: [...options.ignore ?? [], ...defaultIgnoredDirectories],
+});
+
+const isIgnoredByIgnoreFiles = async (patterns, options) => {
+	const {cwd, suppressErrors, deep, ignore} = normalizeOptions(options);
+
+	const paths = await out(patterns, {
+		cwd,
+		suppressErrors,
+		deep,
+		ignore,
+		...ignoreFilesGlobOptions,
+	});
+
+	const files = await Promise.all(
+		paths.map(async filePath => ({
+			filePath,
+			content: await external_node_fs_promises_namespaceObject.readFile(filePath, 'utf8'),
+		})),
+	);
+
+	return getIsIgnoredPredicate(files, cwd);
+};
+
+const isIgnoredByIgnoreFilesSync = (patterns, options) => {
+	const {cwd, suppressErrors, deep, ignore} = normalizeOptions(options);
+
+	const paths = out.sync(patterns, {
+		cwd,
+		suppressErrors,
+		deep,
+		ignore,
+		...ignoreFilesGlobOptions,
+	});
+
+	const files = paths.map(filePath => ({
+		filePath,
+		content: external_node_fs_namespaceObject.readFileSync(filePath, 'utf8'),
+	}));
+
+	return getIsIgnoredPredicate(files, cwd);
+};
+
+const isGitIgnored = options => isIgnoredByIgnoreFiles(GITIGNORE_FILES_PATTERN, options);
+const isGitIgnoredSync = options => isIgnoredByIgnoreFilesSync(GITIGNORE_FILES_PATTERN, options);
+
+;// CONCATENATED MODULE: ./node_modules/globby/index.js
+
+
+
+
+
+
+
+
+
+
+const assertPatternsInput = patterns => {
+	if (patterns.some(pattern => typeof pattern !== 'string')) {
+		throw new TypeError('Patterns must be a string or an array of strings');
+	}
+};
+
+const normalizePathForDirectoryGlob = (filePath, cwd) => {
+	const path = isNegativePattern(filePath) ? filePath.slice(1) : filePath;
+	return external_node_path_namespaceObject.isAbsolute(path) ? path : external_node_path_namespaceObject.join(cwd, path);
+};
+
+const getDirectoryGlob = ({directoryPath, files, extensions}) => {
+	const extensionGlob = extensions?.length > 0 ? `.${extensions.length > 1 ? `{${extensions.join(',')}}` : extensions[0]}` : '';
+	return files
+		? files.map(file => external_node_path_namespaceObject.posix.join(directoryPath, `**/${external_node_path_namespaceObject.extname(file) ? file : `${file}${extensionGlob}`}`))
+		: [external_node_path_namespaceObject.posix.join(directoryPath, `**${extensionGlob ? `/*${extensionGlob}` : ''}`)];
+};
+
+const directoryToGlob = async (directoryPaths, {
+	cwd = external_node_process_namespaceObject.cwd(),
+	files,
+	extensions,
+} = {}) => {
+	const globs = await Promise.all(directoryPaths.map(async directoryPath =>
+		(await isDirectory(normalizePathForDirectoryGlob(directoryPath, cwd))) ? getDirectoryGlob({directoryPath, files, extensions}) : directoryPath),
+	);
+
+	return globs.flat();
+};
+
+const directoryToGlobSync = (directoryPaths, {
+	cwd = external_node_process_namespaceObject.cwd(),
+	files,
+	extensions,
+} = {}) => directoryPaths.flatMap(directoryPath => isDirectorySync(normalizePathForDirectoryGlob(directoryPath, cwd)) ? getDirectoryGlob({directoryPath, files, extensions}) : directoryPath);
+
+const toPatternsArray = patterns => {
+	patterns = [...new Set([patterns].flat())];
+	assertPatternsInput(patterns);
+	return patterns;
+};
+
+const checkCwdOption = cwd => {
+	if (!cwd) {
+		return;
+	}
+
+	let stat;
+	try {
+		stat = external_node_fs_namespaceObject.statSync(cwd);
+	} catch {
+		return;
+	}
+
+	if (!stat.isDirectory()) {
+		throw new Error('The `cwd` option must be a path to a directory');
+	}
+};
+
+const globby_normalizeOptions = (options = {}) => {
+	options = {
+		...options,
+		ignore: options.ignore ?? [],
+		expandDirectories: options.expandDirectories ?? true,
+		cwd: toPath(options.cwd),
+	};
+
+	checkCwdOption(options.cwd);
+
+	return options;
+};
+
+const normalizeArguments = function_ => async (patterns, options) => function_(toPatternsArray(patterns), globby_normalizeOptions(options));
+const normalizeArgumentsSync = function_ => (patterns, options) => function_(toPatternsArray(patterns), globby_normalizeOptions(options));
+
+const getIgnoreFilesPatterns = options => {
+	const {ignoreFiles, gitignore} = options;
+
+	const patterns = ignoreFiles ? toPatternsArray(ignoreFiles) : [];
+	if (gitignore) {
+		patterns.push(GITIGNORE_FILES_PATTERN);
+	}
+
+	return patterns;
+};
+
+const getFilter = async options => {
+	const ignoreFilesPatterns = getIgnoreFilesPatterns(options);
+	return createFilterFunction(
+		ignoreFilesPatterns.length > 0 && await isIgnoredByIgnoreFiles(ignoreFilesPatterns, options),
+	);
+};
+
+const getFilterSync = options => {
+	const ignoreFilesPatterns = getIgnoreFilesPatterns(options);
+	return createFilterFunction(
+		ignoreFilesPatterns.length > 0 && isIgnoredByIgnoreFilesSync(ignoreFilesPatterns, options),
+	);
+};
+
+const createFilterFunction = isIgnored => {
+	const seen = new Set();
+
+	return fastGlobResult => {
+		const pathKey = external_node_path_namespaceObject.normalize(fastGlobResult.path ?? fastGlobResult);
+
+		if (seen.has(pathKey) || (isIgnored && isIgnored(pathKey))) {
+			return false;
+		}
+
+		seen.add(pathKey);
+
+		return true;
+	};
+};
+
+const unionFastGlobResults = (results, filter) => results.flat().filter(fastGlobResult => filter(fastGlobResult));
+
+const convertNegativePatterns = (patterns, options) => {
+	const tasks = [];
+
+	while (patterns.length > 0) {
+		const index = patterns.findIndex(pattern => isNegativePattern(pattern));
+
+		if (index === -1) {
+			tasks.push({patterns, options});
+			break;
+		}
+
+		const ignorePattern = patterns[index].slice(1);
+
+		for (const task of tasks) {
+			task.options.ignore.push(ignorePattern);
+		}
+
+		if (index !== 0) {
+			tasks.push({
+				patterns: patterns.slice(0, index),
+				options: {
+					...options,
+					ignore: [
+						...options.ignore,
+						ignorePattern,
+					],
+				},
+			});
+		}
+
+		patterns = patterns.slice(index + 1);
+	}
+
+	return tasks;
+};
+
+const normalizeExpandDirectoriesOption = (options, cwd) => ({
+	...(cwd ? {cwd} : {}),
+	...(Array.isArray(options) ? {files: options} : options),
+});
+
+const generateTasks = async (patterns, options) => {
+	const globTasks = convertNegativePatterns(patterns, options);
+
+	const {cwd, expandDirectories} = options;
+
+	if (!expandDirectories) {
+		return globTasks;
+	}
+
+	const directoryToGlobOptions = normalizeExpandDirectoriesOption(expandDirectories, cwd);
+
+	return Promise.all(
+		globTasks.map(async task => {
+			let {patterns, options} = task;
+
+			[
+				patterns,
+				options.ignore,
+			] = await Promise.all([
+				directoryToGlob(patterns, directoryToGlobOptions),
+				directoryToGlob(options.ignore, {cwd}),
+			]);
+
+			return {patterns, options};
+		}),
+	);
+};
+
+const generateTasksSync = (patterns, options) => {
+	const globTasks = convertNegativePatterns(patterns, options);
+	const {cwd, expandDirectories} = options;
+
+	if (!expandDirectories) {
+		return globTasks;
+	}
+
+	const directoryToGlobSyncOptions = normalizeExpandDirectoriesOption(expandDirectories, cwd);
+
+	return globTasks.map(task => {
+		let {patterns, options} = task;
+		patterns = directoryToGlobSync(patterns, directoryToGlobSyncOptions);
+		options.ignore = directoryToGlobSync(options.ignore, {cwd});
+		return {patterns, options};
+	});
+};
+
+const globby = normalizeArguments(async (patterns, options) => {
+	const [
+		tasks,
+		filter,
+	] = await Promise.all([
+		generateTasks(patterns, options),
+		getFilter(options),
+	]);
+
+	const results = await Promise.all(tasks.map(task => out(task.patterns, task.options)));
+	return unionFastGlobResults(results, filter);
+});
+
+const globbySync = normalizeArgumentsSync((patterns, options) => {
+	const tasks = generateTasksSync(patterns, options);
+	const filter = getFilterSync(options);
+	const results = tasks.map(task => out.sync(task.patterns, task.options));
+	return unionFastGlobResults(results, filter);
+});
+
+const globbyStream = normalizeArgumentsSync((patterns, options) => {
+	const tasks = generateTasksSync(patterns, options);
+	const filter = getFilterSync(options);
+	const streams = tasks.map(task => out.stream(task.patterns, task.options));
+	const stream = mergeStreams(streams).filter(fastGlobResult => filter(fastGlobResult));
+
+	// TODO: Make it return a web stream at some point.
+	// return Readable.toWeb(stream);
+
+	return stream;
+});
+
+const isDynamicPattern = normalizeArgumentsSync(
+	(patterns, options) => patterns.some(pattern => out.isDynamicPattern(pattern, options)),
+);
+
+const generateGlobTasks = normalizeArguments(generateTasks);
+const generateGlobTasksSync = normalizeArgumentsSync(generateTasksSync);
+
+
+
+const {convertPathToPattern} = out;
+
+;// CONCATENATED MODULE: ./src/glob.ts
+
+
+async function glob(patterns, root, ignore = []) {
+    if (typeof patterns === "string") {
+        patterns = [patterns];
+    }
+    return commonjs.difference.multiset(await globby([...patterns, "!.git/**/*"], { cwd: root, dot: true }), ignore);
+}
+
+;// CONCATENATED MODULE: ./src/repositories/repository.ts
+
+
+
+const SOURCE_CONFIG_FILE_NAME = "template-sync.json";
+const POSSIBLE_SOURCE_CONFIG_FILE_NAMES = [
+    SOURCE_CONFIG_FILE_NAME,
+    ".github/" + SOURCE_CONFIG_FILE_NAME,
+];
+const TEMPLATE_CONFIG_FILE_NAME = "template-sync.template.json";
+const POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES = [
+    TEMPLATE_CONFIG_FILE_NAME,
+    ".github/" + TEMPLATE_CONFIG_FILE_NAME,
+];
+class Repository {
+    root;
+    constructor(root) {
+        this.root = root;
+    }
+    path(relative) {
+        return (0,external_path_.join)(this.root, relative);
+    }
+    async files(patterns = ["**/*"], ignore = []) {
+        return await glob(patterns, this.root, [
+            ...ignore,
+            ...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES,
+        ]);
+    }
+    async sourceConfigFileName() {
+        return await firstExistingPath(this.root, POSSIBLE_SOURCE_CONFIG_FILE_NAMES);
+    }
+    async templateConfigFileName() {
+        return await firstExistingPath(this.root, POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES);
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/sync.ts
 
 
 
-async function sync_sync(sourceRoot, { repositoryCloner, }) {
-    const sourceConfig = await loadSourceConfig(sourceRoot);
-    const source = new Repository(sourceRoot);
-    let reserved = [...POSSIBLE_TEMPLATE_CONFIG_FILE_NAMES];
-    for (const repositoryConfig of sourceConfig.repositories) {
-        console.debug(`Cloning template repository from ${repositoryConfig.url} at branch ${repositoryConfig.branch}`);
-        const template = await repositoryCloner.clone(repositoryConfig.url, repositoryConfig.branch);
-        console.debug("Loading template config");
-        const templateConfig = await loadTemplateConfig(template.root);
-        for (const pluginConfig of templateConfig.plugins) {
-            const plugin = await loadPlugin(pluginConfig, template.root);
+class Syncer {
+    repositorySourcer;
+    constructor(repositorySourcer) {
+        this.repositorySourcer = repositorySourcer;
+    }
+    async sync(sourceRoot) {
+        const source = new Repository(sourceRoot);
+        const sourceConfig = await loadSourceConfig(source.path(await source.sourceConfigFileName()));
+        for (const repositoryConfig of sourceConfig.repositories) {
+            console.debug(`Cloning template repository from ${repositoryConfig.url} at branch ${repositoryConfig.branch}`);
+            const templateRoot = await this.repositorySourcer.source(repositoryConfig.url, repositoryConfig.branch);
+            console.debug("Loading template config");
+            const template = new Repository(templateRoot);
+            const templateConfig = await loadTemplateConfig(template.path(await template.templateConfigFileName()));
+            console.debug("Running template plugins");
+            await this.runPlugins(template, source, template.root, templateConfig.plugins);
+            console.debug("Running source plugins");
+            await this.runPlugins(template, source, source.root, repositoryConfig.after.plugins);
+        }
+        return {
+            repositories: sourceConfig.repositories,
+        };
+    }
+    async runPlugins(template, source, root, pluginConfigs) {
+        let reserved = [];
+        for (const pluginConfig of pluginConfigs) {
+            const plugin = await loadPlugin(pluginConfig, root);
             console.debug(`Executing plugin ${pluginConfig.name}`);
             const { reserved: pluginReserved } = await plugin(template, source, reserved);
             reserved = reserved.concat(...pluginReserved);
         }
     }
-    return {
-        repositories: sourceConfig.repositories,
-    };
 }
 
 ;// CONCATENATED MODULE: ./src/results/result-to-report.ts
@@ -53115,10 +53180,8 @@ ${repositories.join("\n")}`;
 
 async function main() {
     const tmpDir = process.env["RUNNER_TEMP"] || (0,external_os_.tmpdir)();
-    const repositoryCloner = new GitHubRepositoryCloner(core.getInput("token") || null, new GitRepositoryCloner(tmpDir, esm_default().env(process.env)));
-    const result = await sync_sync(process.cwd(), {
-        repositoryCloner,
-    });
+    const syncer = new Syncer(new GitHubRepositorySourcer(core.getInput("token") || null, new GitRepositorySourcer(tmpDir, esm_default().env(process.env))));
+    const result = await syncer.sync(process.cwd());
     core.setOutput("report", syncResultToReport(result));
 }
 void main();
