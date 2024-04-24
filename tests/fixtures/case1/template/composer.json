@@ -3,7 +3,8 @@
 	"description": "some-stub-description",
 	"require": {
 		"r1": "^2.0",
-		"r2": "^3.0"
+		"r2": "^3.0",
+		"package-name": "dev-master"
 	},
 	"require-dev": {
 		"to-override": "^1.0"

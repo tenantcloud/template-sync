@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { PluginFactory } from "../plugin";
 import { readJson, writeJson } from "../../utils";
+import * as R from "remeda";
 
 const optionsSchema = z.strictObject({});
 
@@ -13,16 +14,24 @@ export default ((rawOptions) => {
 		);
 		const sourceComposerJson = await readJson(source.path("composer.json"));
 
+		const prepareRequire = (require: Record<string, string>) => {
+			if (!sourceComposerJson.name) {
+				return require;
+			}
+
+			return R.omit(require, [sourceComposerJson.name]);
+		};
+
 		await writeJson(source.path("composer.json"), {
 			...sourceComposerJson,
-			require: {
+			require: prepareRequire({
 				...sourceComposerJson["require"],
 				...templateComposerJson["require"],
-			},
-			"require-dev": {
+			}),
+			"require-dev": prepareRequire({
 				...sourceComposerJson["require-dev"],
 				...templateComposerJson["require-dev"],
-			},
+			}),
 			scripts: {
 				...sourceComposerJson["scripts"],
 				...templateComposerJson["scripts"],
