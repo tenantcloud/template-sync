@@ -10,6 +10,8 @@ import { syncResultToReport } from "./results/result-to-report";
 
 async function main() {
 	const tmpDir = process.env["RUNNER_TEMP"] || tmpdir();
+	console.debug(`Using ${tmpDir} for temporary files`);
+
 	const syncer = new Syncer(
 		new GitHubRepositorySourcer(
 			core.getInput("token") || null,
