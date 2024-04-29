@@ -52190,12 +52190,13 @@ async function writeJson(path, obj) {
 async function firstExistingPath(root, possibleFileNames) {
     for (const fileName of possibleFileNames) {
         const path = (0,external_path_.join)(root, fileName);
+        console.debug(`Checking if file exists at path ${fileName} (${path})`);
         if (!(await (0,lib.pathExists)(path))) {
             continue;
         }
         return fileName;
     }
-    throw new Error("Could not find file in these paths: " + possibleFileNames.join(", "));
+    throw new Error(`Could not find file in these paths: ${possibleFileNames.join(", ")}`);
 }
 
 ;// CONCATENATED MODULE: ./src/config.ts
@@ -53120,6 +53121,7 @@ class Syncer {
         this.repositorySourcer = repositorySourcer;
     }
     async sync(sourceRoot) {
+        console.debug(`Using ${sourceRoot} as source root / working directory`);
         const source = new Repository(sourceRoot);
         const sourceConfig = await loadSourceConfig(source.path(await source.sourceConfigFileName()));
         for (const repositoryConfig of sourceConfig.repositories) {
@@ -53165,6 +53167,7 @@ ${repositories.join("\n")}`;
 
 async function main() {
     const tmpDir = process.env["RUNNER_TEMP"] || (0,external_os_.tmpdir)();
+    console.debug(`Using ${tmpDir} for temporary files`);
     const syncer = new Syncer(new GitHubRepositorySourcer(core.getInput("token") || null, new GitRepositorySourcer(tmpDir, esm_default().env(process.env))));
     const result = await syncer.sync(process.cwd());
     core.setOutput("report", syncResultToReport(result));
