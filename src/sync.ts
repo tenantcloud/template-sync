@@ -14,6 +14,7 @@ export class Syncer {
 	constructor(private readonly repositorySourcer: RepositorySourcer) {}
 
 	async sync(sourceRoot: string): Promise<SyncResult> {
+		console.debug(`Using ${sourceRoot} as source root / working directory`);
 		const source = new Repository(sourceRoot);
 		const sourceConfig = await loadSourceConfig(
 			source.path(await source.sourceConfigFileName()),

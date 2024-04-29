@@ -18,6 +18,8 @@ export async function firstExistingPath(
 	for (const fileName of possibleFileNames) {
 		const path = join(root, fileName);
 
+		console.debug(`Checking if file exists at path ${fileName} (${path})`);
+
 		if (!(await pathExists(path))) {
 			continue;
 		}
@@ -26,6 +28,6 @@ export async function firstExistingPath(
 	}
 
 	throw new Error(
-		"Could not find file in these paths: " + possibleFileNames.join(", "),
+		`Could not find file in these paths: ${possibleFileNames.join(", ")}`,
 	);
 }
