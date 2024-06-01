@@ -19,7 +19,7 @@
 		"lodash.merge": "^4.6.2",
 		"remeda": "^1.60.1",
 		"simple-git": "^3.24.0",
-		"zod": "^3.22.5"
+		"zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"@commitlint/config-angular": "^19.0.3",
