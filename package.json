@@ -18,7 +18,7 @@
 		"jsonpath": "^1.1.1",
 		"lodash.merge": "^4.6.2",
 		"remeda": "^1.60.1",
-		"simple-git": "^3.24.0",
+		"simple-git": "^3.25.0",
 		"zod": "^3.22.5"
 	},
 	"devDependencies": {
