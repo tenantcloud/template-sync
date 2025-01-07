@@ -1,3 +1,10 @@
+# [1.0.0-alpha.13](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.12...v1.0.0-alpha.13) (2025-01-07)
+
+
+### Bug Fixes
+
+* Update packages ([69344e3](https://github.com/tenantcloud/template-sync/commit/69344e342ddca341bdd6356b277e67dad54d8405))
+
 # [1.0.0-alpha.12](https://github.com/tenantcloud/template-sync/compare/v1.0.0-alpha.11...v1.0.0-alpha.12) (2024-04-29)
 
 
